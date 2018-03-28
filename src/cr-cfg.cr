@@ -98,7 +98,7 @@ module CrCfg
           io.puts(HEADER.gsub(/^\s*([^#])/m, "# \\1"))
         \{% end %}
         \{% for name, settings in CONFIG_PROPS %}
-          io.puts if io.size > 0
+          io.puts if io.size > 0 && "\{{settings[:description].id}}" != "nil"
           \{% if settings[:description] != nil %}
             io.puts("\{{settings[:description].id}}".gsub(/^\s*([^#])/m, "# \\1"))
           \{% end %}

@@ -8,9 +8,15 @@ class Config2
   explaining stuff and things
   and maybe the MIT license"
 
-  option str_option : String, "Some String Description"
-  option int_option : Int32, default: 12345
-  option float_option : Float64, required: true, description: "Multi
+  option str_option : String,
+    description: "Some String Description"
+
+  option int_option : Int32,
+    default: 12345
+
+  option float_option : Float64,
+    required: true,
+    description: "Multi
         line
 comment"
 
@@ -30,7 +36,6 @@ describe "CrCfg 2" do
 
 # Some String Description
 str_option = VALUE
-
 int_option = 12345
 
 # Multi
