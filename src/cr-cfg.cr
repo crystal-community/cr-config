@@ -38,7 +38,7 @@ module CrCfg
 
   macro included
     CONFIG_PROPS = {} of Nil => Nil
-    SUPPORTED_TYPES = [String, Int32, Float64]
+    SUPPORTED_TYPES = [String, Int32, Float64, Bool]
 
     macro finished
       \{% for name, settings in CONFIG_PROPS %}
@@ -49,6 +49,8 @@ module CrCfg
           @\{{name}} = \{% if settings[:default] != nil %}\{{settings[:default].id}}\{% else %}0\{% end %}
         \{% elsif settings[:type].id == "Float64" %}
           @\{{name}} = \{% if settings[:default] != nil %}\{{settings[:default].id}}\{% else %}0.0\{% end %}
+        \{% elsif settings[:type].id == "Bool" %}
+          @\{{name}} = \{% if settings[:default] != nil %}\{{settings[:default].id}}\{% else %}false\{% end %}
         \{% end %}
       \{% end %}
 
@@ -61,7 +63,7 @@ module CrCfg
           File.open(file_name, "w") do |file|
             file.puts(generate_config)
           end
-          raise ConfigException.new(file_name, ConfigException::Type::ConfigNotFound, "Failed to parse#{file_name}, generated sample config instead")
+          raise ConfigException.new(file_name, ConfigException::Type::ConfigNotFound, "Failed to parse #{file_name}, generated sample config instead")
         end
 
         load(File.open(file_name, "r"))
@@ -78,6 +80,8 @@ module CrCfg
               @\{{name}} = line.split("=")[1].strip.to_i if line.starts_with?("\{{name}}")
             \{% elsif settings[:type].id == "Float64" %}
               @\{{name}} = line.split("=")[1].strip.to_f if line.starts_with?("\{{name}}")
+            \{% elsif settings[:type].id == "Bool" %}
+              @\{{name}} = line.split("=")[1].strip.to_b if line.starts_with?("\{{name}}")
             \{% end %}
             rescue e : Exception
               raise ConfigException.new("\{{name}}", ConfigException::Type::ParseError, "Error while parsing \{{name}}: #{e.message}")
