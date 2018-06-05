@@ -20,6 +20,8 @@ class Config2
         line
 comment"
 
+  option bool_option : Bool
+
   footer "Not sure who would use the footer, but here it is"
 end
 
@@ -42,6 +44,7 @@ int_option = 12345
 # line
 # comment
 float_option = VALUE
+bool_option = false
 
 # Not sure who would use the footer, but here it is
 "
@@ -67,6 +70,7 @@ float_option = VALUE
     c.str_option.should eq ""
     c.int_option.should eq 12345
     c.float_option.should eq 4.0
+    c.bool_option.should eq false
   end
 
   it "handles parse exceptions" do
@@ -79,5 +83,13 @@ float_option = VALUE
       e.type.should eq CrCfg::ConfigException::Type::ParseError
       e.parse_message.includes?("Invalid Int32: NaN").should eq true
     end
+  end
+
+  it "parses bool options" do
+    c = Config2.new
+
+    c.load(IO::Memory.new("float_option = 1\nbool_option = true"))
+
+    c.bool_option.should eq true
   end
 end

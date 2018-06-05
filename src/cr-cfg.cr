@@ -27,6 +27,7 @@ module CrCfg
 
   macro option(name, description = nil, default = nil, required = false)
     {% raise "#{name.type} is not supported as a config type" unless SUPPORTED_TYPES.includes?(name.type) %}
+    {% default = false if default == nil && "#{name.type}" == "Bool" %}
     {% CONFIG_PROPS[name.var] = {
          name:        name.var,
          type:        name.type,
@@ -81,7 +82,7 @@ module CrCfg
             \{% elsif settings[:type].id == "Float64" %}
               @\{{name}} = line.split("=")[1].strip.to_f if line.starts_with?("\{{name}}")
             \{% elsif settings[:type].id == "Bool" %}
-              @\{{name}} = line.split("=")[1].strip.to_b if line.starts_with?("\{{name}}")
+              @\{{name}} = (line.split("=")[1].strip.downcase == "true" ? true : false) if line.starts_with?("\{{name}}")
             \{% end %}
             rescue e : Exception
               raise ConfigException.new("\{{name}}", ConfigException::Type::ParseError, "Error while parsing \{{name}}: #{e.message}")
@@ -103,7 +104,7 @@ module CrCfg
         \{% end %}
         \{% for name, settings in CONFIG_PROPS %}
           io.puts if io.size > 0 && "\{{settings[:description].id}}" != "nil"
-          \{% if settings[:description] != nil %}
+          \{% if settings[:description] != nil && settings[:description].size > 0%}
             io.puts("\{{settings[:description].id}}".gsub(/^\s*([^#])/m, "# \\1"))
           \{% end %}
           io.puts("\{{settings[:name]}} = \{% if settings[:default] == nil %}VALUE\{% else %}\{{settings[:default].id}}\{% end %}")
