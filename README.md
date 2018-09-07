@@ -1,6 +1,6 @@
 # cr-cfg
 
-A simple Model based config generator and parser. You just define the config you want and 
+A simple Model based config generator and parser. You just define the config you want and
 if it doesn't exist, a sample one will be generated based on how you defined it. If it does
 exist, it will parse the config options it knows about into local variables of the correct
 type.
@@ -26,7 +26,7 @@ class MyConfig
   include CrCfg
 
   # defaults to config.txt if not specified
-  file_name "my_config.txt" 
+  file_name "my_config.txt"
 
   header "Something that can describe the config file
     May take multiple lines"
@@ -93,6 +93,8 @@ May take multiple lines
     --boolean                     Bool options are, well, for booleans
     -s S, --option4 OPTION4       NEW! Argument flag can now be supplied. Your param can be defined in a config but overwritten by an argument passed in
 ```
+When using this project to parse arguments, it leaves the ARGV global variable
+intact so multiple arg parsers can be run with it.
 
 ## Wish List
 - [ ] Fill out config for missing options in event model is updated

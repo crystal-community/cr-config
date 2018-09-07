@@ -149,7 +149,9 @@ module CrCfg
             raise ConfigException.new("\{{name}}", ConfigException::Type::OptionNotFound, "Never parsed \{{name}} (\{{settings[:type]}}), which is a required setting") if @\{{name}} == "" || (@\{{name}}.is_a?(Float) && @\{{name}}.as(Float).nan?)
           \{% end %}
         \{% end %}
-        @_arg_parser.parse!
+        # Clone the ARGV array so other option parsers may use it
+        argv = ARGV.map { |x| x }
+        @_arg_parser.parse(argv)
       end
 
       private def _create_flag(flag : String, t : String)
