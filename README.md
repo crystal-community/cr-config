@@ -31,6 +31,10 @@ class MyConfig
   header "Something that can describe the config file
     May take multiple lines"
 
+  # You may use this macro so passing in -h or --help to the program well exit when the help generated
+  # by this config gets printed. Useful to omit if there are multiple argument parsers at work
+  # exit_on_help
+
   option myOption1 : String,
     description: "While optional, it helps to have a description of your option",
     default: "my option" # also optional
@@ -40,16 +44,25 @@ class MyConfig
     Adding a default to an option negates its requiredness.",
     required: true
 
+  option myOption3 : Bool,
+    description "Bool options are, well, for booleans",
+    flag: "--boolean"
+
+  option myOption4 : String,
+    description: "NEW! Argument flag can now be supplied. Your param can be defined in a config but overwritten by an argument passed in",
+    shortflag: "-s",
+    longflag: "--option4"
+
   option lastOption : Float64
 
   footer "In the event you want a footer for your config."
 end
 
 c = MyConfig.new
-c.load # will attempt to read and parse my_config.txt. If it doesn't exist, it will generate a sample one
+c.load # will attempt to read and parse my_config.txt. If it doesn't exist, it will generate a sample one and exit
 
 c.generate_config
-#### RETURNS IO::Memory WITH CONTENT ####
+#### RETURNS IO::Memory WITH CONTENT: ####
 # Something that can describe the config file
 # May take multiple lines
 
@@ -58,6 +71,12 @@ myOption1 = my option
 
 # Some options can be made required, which means they need to be defined in the config
 myOption2 = VALUE
+
+# Bool options are, well, for booleans
+myOption3 = VALUE
+
+# NEW! Argument flag can now be supplied. Your param can be defined in a config but overwritten by an argument passed in
+myOption4 = VALUE
 lastOption = VALUE
 
 # In the event you want a footer for your config.
@@ -67,9 +86,18 @@ c.myOption2
 c.lastOption
 ```
 
+Running your program with the `-h` or `--help` cli arguments will print
+```
+Something that can describe the config file
+May take multiple lines
+    --boolean                     Bool options are, well, for booleans
+    -s S, --option4 OPTION4       NEW! Argument flag can now be supplied. Your param can be defined in a config but overwritten by an argument passed in
+```
+
 ## Wish List
 - [ ] Fill out config for missing options in event model is updated
 - [ ] Support of lists
+- [X] support argument parsing
 
 ## Contributors
 
