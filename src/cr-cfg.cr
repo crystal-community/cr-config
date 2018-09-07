@@ -1,3 +1,5 @@
+require "option_parser"
+
 module CrCfg
   class ConfigException < Exception
     enum Type
@@ -25,7 +27,11 @@ module CrCfg
     FOOTER = {{desc}}
   end
 
-  macro option(name, description = nil, default = nil, required = false)
+  macro exit_on_help
+    EXIT_ON_HELP = true
+  end
+
+  macro option(name, description = nil, default = nil, required = false, flag = nil, shortflag = nil, longflag = nil)
     {% raise "#{name.type} is not supported as a config type" unless SUPPORTED_TYPES.includes?(name.type) %}
     {% default = false if default == nil && "#{name.type}" == "Bool" %}
     {% CONFIG_PROPS[name.var] = {
@@ -34,6 +40,9 @@ module CrCfg
          description: description,
          default:     default,
          required:    required,
+         flag:        flag,
+         shortflag:   shortflag,
+         longflag:    longflag,
        } %}
   end
 
@@ -42,18 +51,23 @@ module CrCfg
     SUPPORTED_TYPES = [String, Int32, Float64, Bool]
 
     macro finished
-      \{% for name, settings in CONFIG_PROPS %}
-        getter \{{name}}
-        \{% if settings[:type].id == "String" %}
-          @\{{name}} = \{% if settings[:default] != nil %}"\{{settings[:default].id}}"\{% else %}""\{% end %}
-        \{% elsif settings[:type].id == "Int32" %}
-          @\{{name}} = \{% if settings[:default] != nil %}\{{settings[:default].id}}\{% else %}0\{% end %}
-        \{% elsif settings[:type].id == "Float64" %}
-          @\{{name}} = \{% if settings[:default] != nil %}\{{settings[:default].id}}\{% else %}0.0\{% end %}
-        \{% elsif settings[:type].id == "Bool" %}
-          @\{{name}} = \{% if settings[:default] != nil %}\{{settings[:default].id}}\{% else %}false\{% end %}
-        \{% end %}
-      \{% end %}
+      {% verbatim do %}
+        @_arg_parser = OptionParser.new
+
+
+        {% for name, settings in CONFIG_PROPS %}
+          getter {{name}}
+          {% if settings[:type].id == "String" %}
+            @{{name}} = {% if settings[:default] != nil %}"{{settings[:default].id}}"{% else %}""{% end %}
+          {% elsif settings[:type].id == "Int32" %}
+            @{{name}} = {% if settings[:default] != nil %}{{settings[:default].id}}{% else %}0{% end %}
+          {% elsif settings[:type].id == "Float64" %}
+            @{{name}} = {% if settings[:default] != nil %}{{settings[:default].id}}{% elsif settings[:required] %}Float64::NAN{% else %}0.0{% end %}
+          {% elsif settings[:type].id == "Bool" %}
+            @{{name}} = {% if settings[:default] != nil %}{{settings[:default].id}}{% else %}false{% end %}
+          {% end %}
+        {% end %}
+      {% end %}
 
       def load
         load(\{% if @type.has_constant?(:DEFAULT_NAME) %}DEFAULT_NAME\{% else %}"config.txt"\{% end %})
@@ -71,6 +85,47 @@ module CrCfg
       end
 
       def load(input : IO)
+        \{% if @type.has_constant?(:HEADER) %}
+          @_arg_parser.banner = HEADER
+        \{% end %}
+        @_arg_parser.on("-h", "--help", "Prints this message") do
+          puts @_arg_parser
+          {% if @type.has_constant?(:EXIT_ON_HELP) %}
+            exit(0)
+          {% end %}
+        end
+        \{% for name, settings in CONFIG_PROPS %}
+            \{% if settings[:flag] != nil %}
+              \{% raise "#{settings[:name]} must define a description if it's using the flag option" if settings[:description] == nil %}
+              @_arg_parser.on(_create_flag(\{{settings[:flag]}}, "\{{settings[:type].id}}"), \{{settings[:description]}}) do |s|
+                \{% if settings[:type].id == "String" %}
+                  @\{{name}} = s
+                \{% elsif settings[:type].id == "Int32" %}
+                  @\{{name}} = s.to_i
+                \{% elsif settings[:type].id == "Float64" %}
+                  @\{{name}} = s.to_f
+                \{% elsif settings[:type].id == "Bool" %}
+                  @\{{name}} = true
+                \{% end %}
+              end
+            \{% elsif settings[:shortflag] != nil && settings[:longflag] != nil %}
+              \{% raise "#{settings[:name]} must define a description if it's using the shortflag and longflag options" if settings[:description] == nil %}
+              @_arg_parser.on(_create_flag(\{{settings[:shortflag]}}, "\{{settings[:type]}}"),
+                _create_flag(\{{settings[:longflag]}}, "\{{settings[:type]}}"),
+                \{{settings[:description]}}) do |s|
+                \{% if settings[:type].id == "String" %}
+                  @\{{name}} = s
+                \{% elsif settings[:type].id == "Int32" %}
+                  @\{{name}} = s.to_i
+                \{% elsif settings[:type].id == "Float64" %}
+                  @\{{name}} = s.to_f
+                \{% elsif settings[:type].id == "Bool" %}
+                  @\{{name}} = (s == "true")
+                \{% end %}
+              end
+            \{% end %}
+        \{% end %}
+
         input.each_line do |line|
           next if line.starts_with?("#")
           \{% for name, settings in CONFIG_PROPS %}
@@ -82,7 +137,7 @@ module CrCfg
             \{% elsif settings[:type].id == "Float64" %}
               @\{{name}} = line.split("=")[1].strip.to_f if line.starts_with?("\{{name}}")
             \{% elsif settings[:type].id == "Bool" %}
-              @\{{name}} = (line.split("=")[1].strip.downcase == "true" ? true : false) if line.starts_with?("\{{name}}")
+              @\{{name}} = (line.split("=")[1].strip.downcase == "true") if line.starts_with?("\{{name}}")
             \{% end %}
             rescue e : Exception
               raise ConfigException.new("\{{name}}", ConfigException::Type::ParseError, "Error while parsing \{{name}}: #{e.message}")
@@ -91,9 +146,15 @@ module CrCfg
         end
         \{% for name, settings in CONFIG_PROPS %}
           \{% if settings[:required] == true && settings[:default] == nil %}
-            raise ConfigException.new("\{{name}}", ConfigException::Type::OptionNotFound, "Never parsed \{{name}} (\{{settings[:type]}}), which is a required setting") if @\{{name}} == "" || @\{{name}} == 0
+            raise ConfigException.new("\{{name}}", ConfigException::Type::OptionNotFound, "Never parsed \{{name}} (\{{settings[:type]}}), which is a required setting") if @\{{name}} == "" || (@\{{name}}.is_a?(Float) && @\{{name}}.as(Float).nan?)
           \{% end %}
         \{% end %}
+        @_arg_parser.parse!
+      end
+
+      private def _create_flag(flag : String, t : String)
+        return flag if t == "Bool"
+        return "#{flag} #{flag.gsub("-","").upcase}"
       end
 
       def generate_config() : IO
