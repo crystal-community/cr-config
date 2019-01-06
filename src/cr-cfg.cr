@@ -144,14 +144,33 @@ module CrCfg
             end
           \{% end %}
         end
+
+        # Check environment variables to see if propreties were set there
+        \{% for name, settings in CONFIG_PROPS %}
+            begin
+            \{% if settings[:type].id == "String" %}
+              @\{{name}} = ENV["\{{name.id}}".upcase].strip if ENV.has_key?("\{{name.id}}".upcase)
+            \{% elsif settings[:type].id == "Int32" %}
+              @\{{name}} = ENV["\{{name.id}}".upcase].strip.to_i if ENV.has_key?("\{{name.id}}".upcase)
+            \{% elsif settings[:type].id == "Float64" %}
+              @\{{name}} = ENV["\{{name.id}}".upcase].strip.to_f if ENV.has_key?("\{{name.id}}".upcase)
+            \{% elsif settings[:type].id == "Bool" %}
+              @\{{name}} = (ENV["\{{name.id}}".upcase].strip.downcase == "true") if ENV.has_key?("\{{name.id}}".upcase)
+            \{% end %}
+            rescue e : Exception
+              raise ConfigException.new("\{{name}}", ConfigException::Type::ParseError, "Error while parsing \{{name}}: #{e.message}")
+            end
+        \{% end %}
+
+        # Clone the ARGV array so other option parsers may use it
+        argv = ARGV.map { |x| x }
+        @_arg_parser.parse(argv)
+
         \{% for name, settings in CONFIG_PROPS %}
           \{% if settings[:required] == true && settings[:default] == nil %}
             raise ConfigException.new("\{{name}}", ConfigException::Type::OptionNotFound, "Never parsed \{{name}} (\{{settings[:type]}}), which is a required setting") if @\{{name}} == "" || (@\{{name}}.is_a?(Float) && @\{{name}}.as(Float).nan?)
           \{% end %}
         \{% end %}
-        # Clone the ARGV array so other option parsers may use it
-        argv = ARGV.map { |x| x }
-        @_arg_parser.parse(argv)
       end
 
       private def _create_flag(flag : String, t : String)

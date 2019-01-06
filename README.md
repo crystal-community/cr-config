@@ -49,9 +49,12 @@ class MyConfig
     flag: "--boolean"
 
   option myOption4 : String,
-    description: "NEW! Argument flag can now be supplied. Your param can be defined in a config but overwritten by an argument passed in",
+    description: "Argument flag can now be supplied. Your param can be defined in a config but overwritten by an argument passed in",
     shortflag: "-s",
     longflag: "--option4"
+
+  option myOption5 : String,
+    description: "NEW! You can set properties as environment variables using the uppercase of the name"
 
   option lastOption : Float64
 
@@ -100,6 +103,7 @@ intact so multiple arg parsers can be run with it.
 - [ ] Fill out config for missing options in event model is updated
 - [ ] Support of lists
 - [X] support argument parsing
+- [X] support environment variables
 
 ## Contributors
 
