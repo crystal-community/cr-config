@@ -4,7 +4,8 @@ class Config4
   include CrCfg
 
   option str_option : String, "Some String Description",
-    flag: "-s"
+    flag: "-s",
+    required: true
 end
 
 def set_argv(args : Array(String))
