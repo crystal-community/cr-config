@@ -57,4 +57,13 @@ describe "Ordering" do
 
     c.str_option.should eq "right"
   end
+
+  it "successfully parses if value is in environment variable" do
+    c = Config4.new
+    set_env({"STR_OPTION" => "right"})
+
+    c.load(IO::Memory.new)
+
+    c.str_option.should eq "right"
+  end
 end
