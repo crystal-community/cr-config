@@ -19,6 +19,10 @@ module CrCfg
     DEFAULT_NAME = {{name}}
   end
 
+  macro no_file
+    NO_FILE = true
+  end
+
   macro header(desc)
     HEADER = {{desc}}
   end
@@ -70,7 +74,11 @@ module CrCfg
       {% end %}
 
       def load
+        {% if @type.has_constant?(:NO_FILE) %}
+          load(IO::Memory.new)
+        {% else %}
         load(\{% if @type.has_constant?(:DEFAULT_NAME) %}DEFAULT_NAME\{% else %}"config.txt"\{% end %})
+        {% end %}
       end
 
       def load(file_name : String)
