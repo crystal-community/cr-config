@@ -74,11 +74,11 @@ module CrCfg
       {% end %}
 
       def load
-        {% if @type.has_constant?(:NO_FILE) %}
+        \{% if @type.has_constant?(:NO_FILE) %}
           load(IO::Memory.new)
-        {% else %}
+        \{% else %}
         load(\{% if @type.has_constant?(:DEFAULT_NAME) %}DEFAULT_NAME\{% else %}"config.txt"\{% end %})
-        {% end %}
+        \{% end %}
       end
 
       def load(file_name : String)
@@ -98,9 +98,9 @@ module CrCfg
         \{% end %}
         @_arg_parser.on("-h", "--help", "Prints this message") do
           puts @_arg_parser
-          {% if @type.has_constant?(:EXIT_ON_HELP) %}
+          \{% if @type.has_constant?(:EXIT_ON_HELP) %}
             exit(0)
-          {% end %}
+          \{% end %}
         end
         \{% for name, settings in CONFIG_PROPS %}
             \{% if settings[:flag] != nil %}
