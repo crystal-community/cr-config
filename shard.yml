@@ -4,6 +4,6 @@ version: 1.0.5
 authors:
   - Troy A. Sornson <troyasornson37@gmail.com>
 
-crystal: 0.35.1
+crystal: 1.0.0
 
 license: MIT
