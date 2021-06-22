@@ -58,7 +58,6 @@ module CrCfg
       {% verbatim do %}
         @_arg_parser = OptionParser.new
 
-
         {% for name, settings in CONFIG_PROPS %}
           getter {{name}}
           {% if settings[:type].id == "String" %}

@@ -6,7 +6,7 @@ class Config5
   no_file
 
   option str_option : String, "Some String Description",
-    flag: "-f STR"
+    flag: "-f"
 end
 
 describe "CrCfg 5" do
