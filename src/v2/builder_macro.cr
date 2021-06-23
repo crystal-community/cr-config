@@ -50,11 +50,8 @@ module CrCfgV2::BuilderMacro
         } of String => Proc(String, {{@type}}Builder, AllTypes, Nil)
       {% end %}
 
-      def properties : Hash(String, String)
-        {{@type.id}}.named_fields
-      end
-
       def set(name : String, val : AllTypes)
+        puts("Setting #{val} to #{name}")
         if name.includes?('.')
           prop, rest = name.split(".", 2)
           @_setters[prop].call(rest, self, val)

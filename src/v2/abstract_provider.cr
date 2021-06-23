@@ -2,7 +2,7 @@ module CrCfgV2
   abstract class AbstractBuilder
     abstract def build
 
-    abstract def properties : Hash(String, String)
+    abstract def set(name : String, val : AllTypes)
   end
 
   abstract class AbstractProvider
