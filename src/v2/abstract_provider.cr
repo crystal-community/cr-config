@@ -1,6 +1,8 @@
 module CrCfgV2
   abstract class AbstractBuilder
     abstract def build
+
+    abstract def properties : Hash(String, String)
   end
 
   abstract class AbstractProvider
