@@ -63,7 +63,6 @@ module CrCfgV2
       def self.load
         bob = {{@type}}Builder.new
 
-        {{@type}}.register_provider(DumbConfigProvider.new)
         @@providers.each do |provider|
           provider.populate(bob)
         end
