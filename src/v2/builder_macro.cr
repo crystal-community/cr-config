@@ -28,6 +28,7 @@ module CrCfgV2::BuilderMacro
           nil
         {% end %}
       end
+
       {% end %}
 
       {% for name, props in CONFIG_PROPS %}
@@ -51,7 +52,6 @@ module CrCfgV2::BuilderMacro
       {% end %}
 
       def set(name : String, val : AllTypes)
-        puts("Setting #{val} to #{name}")
         if name.includes?('.')
           prop, rest = name.split(".", 2)
           @_setters[prop].call(rest, self, val)

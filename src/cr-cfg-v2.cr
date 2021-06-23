@@ -26,6 +26,7 @@ class SubTest
   option prop1 : String, default: "this is a default"
   option prop2 : Int32
   option prop3 : Array(String)
+  option prop4 : Array(Int64)?
 end
 
 # parsable by dotenv
@@ -93,3 +94,6 @@ t3 = Test.load
 puts(t1.inspect)
 puts(t2.inspect)
 puts(t3.inspect)
+
+puts(t1["prop9.prop1"], t2["prop9.prop1"], t3["prop9.prop1"])
+puts(t1["prop10"], t2["prop10"], t3["prop10"])

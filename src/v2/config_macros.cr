@@ -21,6 +21,24 @@ module CrCfgV2
     {% for name, val in CONFIG_PROPS %}
       getter {{name}} : {{val[:type]}}
     {% end %}
+
+    def [](key : String)
+      true_key = key
+      rest = ""
+      true_key, rest = key.split('.', 2) if key.includes?('.')
+
+
+      {% begin %}
+      case true_key
+      {% for name, props in CONFIG_PROPS %}
+      when "{{name}}"
+        return {{SUPPORTED_TYPES.includes?("#{props[:type].types[0]}") ? "@#{name}".id : "@#{name}[rest]".id}}
+      {% end %}
+      else
+        return nil
+      end
+      {% end %}
+    end
   end
 
   macro _generate_constructor
@@ -49,7 +67,6 @@ module CrCfgV2
         @@providers.each do |provider|
           provider.populate(bob)
         end
-        puts(bob.inspect)
 
         bob.build
       end
