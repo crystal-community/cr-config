@@ -7,6 +7,7 @@ module CrCfgV2
 
   SUPPORTED_TYPES = {"String", "Int32", "Int64", "Float32", "Float64", "Bool", "UInt32", "UInt64", "Array(String)", "Array(Int32)", "Array(Int64)", "Array(Float32)", "Array(Float64)", "Array(Bool)", "Array(UInt32)", "Array(UInt64)"}
   alias AllTypes = String | Int32 | Int64 | Float32 | Float64 | Bool | UInt32 | UInt64 | Array(String) | Array(Int32) | Array(Int64) | Array(Float32) | Array(Float64) | Array(Bool) | Array(UInt32) | Array(UInt64)
+  alias PrimitiveTypes = String | Int32 | Int64 | Float32 | Float64 | Bool | UInt32 | UInt64
 
   macro option(name, default = nil)
     {% CONFIG_PROPS[name.var] = {
@@ -22,7 +23,7 @@ module CrCfgV2
       getter {{name}} : {{val[:type]}}
     {% end %}
 
-    def [](key : String)
+    def []?(key : String)
       true_key = key
       rest = ""
       true_key, rest = key.split('.', 2) if key.includes?('.')
@@ -31,13 +32,27 @@ module CrCfgV2
       {% begin %}
       case true_key
       {% for name, props in CONFIG_PROPS %}
+      {% if SUPPORTED_TYPES.includes?("#{props[:type].types[0]}") %}
       when "{{name}}"
-        return {{SUPPORTED_TYPES.includes?("#{props[:type].types[0]}") ? "@#{name}".id : "@#{name}[rest]".id}}
+        # If we're here, and there's a '.' in the initial key, we're treating a primitive as a subconfiguration
+        return nil if key.includes?('.')
+        return @{{name}}
+      {% else %}
+      when "{{name}}"
+        return @{{name}}[rest]
+      {% end %}
       {% end %}
       else
         return nil
       end
       {% end %}
+    end
+
+    def [](key : String)
+      if val = self[key]?
+        return val
+      end
+      raise KeyError.new("Missing configuration key #{key}")
     end
   end
 

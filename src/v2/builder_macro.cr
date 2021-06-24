@@ -29,6 +29,19 @@ module CrCfgV2::BuilderMacro
         {% end %}
       end
 
+      macro _coerce(name, type)
+        puts("#{{{name}}} {{type}}")
+        {% if "#{type}" == "String" %}{{name}}.to_s
+        {% elsif "#{type}" == "Int32" %}"#{{{name}}}".to_i32
+        {% elsif "#{type}" == "Int64" %}"#{{{name}}}".to_i64
+        {% elsif "#{type}" == "Float32" %}"#{{{name}}}".to_f32
+        {% elsif "#{type}" == "Float64" %}"#{{{name}}}".to_f64
+        {% elsif "#{type}" == "Bool" %}!{"false", "0"}.includes?("#{{{name}}}")
+        {% elsif "#{type}" == "UInt32" %}"#{{{name}}}".to_u32
+        {% elsif "#{type}" == "UInt64" %}"#{{{name}}}".to_u64
+        {% else %}{{name}}.as({{type.types[0]}})
+        {% end %}
+      end
       {% end %}
 
       {% for name, props in CONFIG_PROPS %}
@@ -43,7 +56,7 @@ module CrCfgV2::BuilderMacro
         @_setters = {
         {% for name, props in CONFIG_PROPS %}
           {% if SUPPORTED_TYPES.includes?("#{props[:type].types[0]}") %}
-          "{{name}}" => ->(ignore : String, inst : {{@type}}Builder, x : AllTypes) { inst.{{name}} = x.as({{props[:type].types[0]}}); nil },
+          "{{name}}" => ->(ignore : String, inst : {{@type}}Builder, x : AllTypes) { inst.{{name}} = _coerce(x, {{props[:type].types[0]}}); nil },
           {% else %}
           "{{name}}" => ->(name : String, inst : {{@type}}Builder, x : AllTypes) { inst.{{name}}.set(name, x); nil },
           {% end %}
@@ -63,9 +76,11 @@ module CrCfgV2::BuilderMacro
       def validate_settings
         # TODO: gracefully generate a new config?
         {% for name, props in CONFIG_PROPS %}
+        {% unless props[:nilable] %}
         if @{{name}}.nil? && !({{props[:nilable]}})
           raise ConfigException.new "{{name}}", ConfigException::Type::ConfigNotFound, "Not found in any config source"
         end
+        {% end %}
         {% end %}
       end
 

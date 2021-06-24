@@ -35,7 +35,7 @@ prop4 = 1
 prop5 = 0.003
 prop6 = true
 prop7 = 7
-prop8 = 99999999999999999999999999
+prop8 = 999999999999999999
 
 prop9.prop1 = same test
 prop9.prop2 = 37
@@ -51,7 +51,7 @@ prop4: 1
 prop5: 0.003
 prop6: true
 prop7: 7
-prop8: 99999999999999999999999999
+prop8: 999999999999999999
 prop9:
   prop1: same test
   prop2: 37
@@ -71,7 +71,7 @@ json_raw = <<-EOF
   "prop5": 0.003,
   "prop6": true,
   "prop7": 7,
-  "prop8": 99999999999999999999999999,
+  "prop8": 999999999999999999,
   "prop9": {
     "prop1": "same test",
     "prop2": 37,
@@ -100,6 +100,7 @@ end
 
 describe "CrCfg V2" do
   it "gets setup by the dumb provider" do
+    Test.providers.clear
     Test.register_provider(DumbConfigProvider.new)
 
     t1 = Test.load
@@ -109,8 +110,17 @@ describe "CrCfg V2" do
     t1.prop6.should be_true
     t1.prop9.prop2.should eq 50
 
-    t1["prop1"].should be_nil
+    t1["prop1"]?.should be_nil
     t1["prop2"].should eq 3
     t1["prop9.prop2"].should eq 50
+  end
+
+  it "parses and sets JSON" do
+    Test.providers.clear
+    Test.register_provider(CrCfgV2::JsonProvider.new(json_raw))
+
+    t = Test.load
+    t.prop1.should eq "test"
+    t["prop9.prop3"].should eq ["test1", "test 2", "test3"]
   end
 end
