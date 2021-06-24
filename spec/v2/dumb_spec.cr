@@ -137,6 +137,26 @@ describe "CrCfg V2" do
 
     t = Test.load
     t.prop1.should eq "test"
+    t.prop2.should eq 2
+    t.prop3.should eq 3
+    t.prop5.should eq 0.003
+    t.prop6.should be_true
+    t.prop9.prop2.should eq 37
+    t["prop9.prop3"].should eq ["test1", "test 2", "test3"]
+    t["prop11"].class.should eq Array(UInt32)
+  end
+
+  it "parses and sets YAML" do
+    Test.providers.clear
+    Test.register_provider(CrCfgV2::YamlProvider.new(yaml_raw))
+
+    t = Test.load
+    t.prop1.should eq "test"
+    t.prop2.should eq 2
+    t.prop3.should eq 3
+    t.prop5.should eq 0.003
+    t.prop6.should be_true
+    t.prop9.prop2.should eq 37
     t["prop9.prop3"].should eq ["test1", "test 2", "test3"]
     t["prop11"].class.should eq Array(UInt32)
   end
