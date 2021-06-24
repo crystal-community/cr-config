@@ -29,20 +29,33 @@ module CrCfgV2::BuilderMacro
         {% end %}
       end
 
-      macro _coerce(name, type)
-        puts("#{{{name}}} {{type}}")
-        {% if "#{type}" == "String" %}{{name}}.to_s
-        {% elsif "#{type}" == "Int32" %}"#{{{name}}}".to_i32
-        {% elsif "#{type}" == "Int64" %}"#{{{name}}}".to_i64
-        {% elsif "#{type}" == "Float32" %}"#{{{name}}}".to_f32
-        {% elsif "#{type}" == "Float64" %}"#{{{name}}}".to_f64
-        {% elsif "#{type}" == "Bool" %}!{"false", "0"}.includes?("#{{{name}}}")
-        {% elsif "#{type}" == "UInt32" %}"#{{{name}}}".to_u32
-        {% elsif "#{type}" == "UInt64" %}"#{{{name}}}".to_u64
-        {% else %}{{name}}.as({{type.types[0]}})
-        {% end %}
-      end
       {% end %}
+
+      def self.coerce(original : AllTypes, intended_type : Class) : AllTypes
+        return original if original.class == intended_type
+
+        return "#{original}".to_i32 if intended_type == Int32
+        return "#{original}".to_i64 if intended_type == Int64
+        return "#{original}".to_f32 if intended_type == Float32
+        return "#{original}".to_f64 if intended_type == Float64
+        return "#{original}".to_u32 if intended_type == UInt32
+        return "#{original}".to_u64 if intended_type == UInt64
+        return original.to_s if intended_type == String
+        return !{"false", "0"}.includes?("#{original}") if intended_type == Bool
+
+        if original.is_a?(Array) && intended_type.to_s.starts_with?("Array(")
+          {% for i in PrimitiveTypes.union_types %}
+          if intended_type == Array({{i}})
+            a = [] of {{i}}
+            original.each { |x| a << coerce(x, {{i}}).as({{i}}) }
+            return a
+          end
+          {% end %}
+        end
+
+        # Compiler should protect us here
+        raise "Unable to coerce '#{original}' into a type of #{intended_type}"
+      end
 
       {% for name, props in CONFIG_PROPS %}
       {% if SUPPORTED_TYPES.includes?("#{props[:type].types[0]}") %}
@@ -56,7 +69,7 @@ module CrCfgV2::BuilderMacro
         @_setters = {
         {% for name, props in CONFIG_PROPS %}
           {% if SUPPORTED_TYPES.includes?("#{props[:type].types[0]}") %}
-          "{{name}}" => ->(ignore : String, inst : {{@type}}Builder, x : AllTypes) { inst.{{name}} = _coerce(x, {{props[:type].types[0]}}); nil },
+          "{{name}}" => ->(ignore : String, inst : {{@type}}Builder, x : AllTypes) { inst.{{name}} = coerce(x, {{props[:type].types[0]}}).as({{props[:type].types[0]}}); nil },
           {% else %}
           "{{name}}" => ->(name : String, inst : {{@type}}Builder, x : AllTypes) { inst.{{name}}.set(name, x); nil },
           {% end %}

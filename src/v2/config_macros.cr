@@ -5,9 +5,16 @@ module CrCfgV2
   include BuilderMacro
   include ConfigProvider
 
-  SUPPORTED_TYPES = {"String", "Int32", "Int64", "Float32", "Float64", "Bool", "UInt32", "UInt64", "Array(String)", "Array(Int32)", "Array(Int64)", "Array(Float32)", "Array(Float64)", "Array(Bool)", "Array(UInt32)", "Array(UInt64)"}
-  alias AllTypes = String | Int32 | Int64 | Float32 | Float64 | Bool | UInt32 | UInt64 | Array(String) | Array(Int32) | Array(Int64) | Array(Float32) | Array(Float64) | Array(Bool) | Array(UInt32) | Array(UInt64)
   alias PrimitiveTypes = String | Int32 | Int64 | Float32 | Float64 | Bool | UInt32 | UInt64
+
+  {% begin %}
+  alias AllTypes = PrimitiveTypes {% for t in PrimitiveTypes.union_types %}| Array({{t}}) {% end %}
+  {% end %}
+  {% begin %}
+  SUPPORTED_TYPES = { {% for t in AllTypes.union_types %}"{{t}}",{% end %}}
+  {% end %}
+
+  Array(String) | Array(Int32) | Array(Int64) | Array(Float32) | Array(Float64) | Array(Bool) | Array(UInt32) | Array(UInt64)
 
   macro option(name, default = nil)
     {% CONFIG_PROPS[name.var] = {

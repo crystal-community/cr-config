@@ -15,6 +15,7 @@ class Test
   option prop9 : SubTest
 
   option prop10 : Float64, default: Float64::NAN
+  option prop11 : Array(UInt32)
 end
 
 class SubTest
@@ -36,6 +37,7 @@ prop5 = 0.003
 prop6 = true
 prop7 = 7
 prop8 = 999999999999999999
+prop11 = 1, 2, 3, 5, 8
 
 prop9.prop1 = same test
 prop9.prop2 = 37
@@ -59,6 +61,12 @@ prop9:
    - test1
    - test 2
    - test3
+prop11:
+  - 1
+  - 2
+  - 3
+  - 5
+  - 8
 EOF
 
 # parsable by JSON
@@ -80,7 +88,14 @@ json_raw = <<-EOF
       "test 2",
       "test3"
     ]
-  }
+  },
+  "prop11": [
+    1,
+    2,
+    3,
+    5,
+    8
+  ]
 }
 EOF
 
@@ -95,6 +110,7 @@ class DumbConfigProvider < CrCfgV2::AbstractProvider
     bob.set("prop8", 111111111.to_u64)
     bob.set("prop9.prop2", 50)
     bob.set("prop9.prop3", ["this is ", "an", " array"])
+    bob.set("prop11", [1, 2, 3, 5, 8])
   end
 end
 
@@ -122,5 +138,6 @@ describe "CrCfg V2" do
     t = Test.load
     t.prop1.should eq "test"
     t["prop9.prop3"].should eq ["test1", "test 2", "test3"]
+    t["prop11"].class.should eq Array(UInt32)
   end
 end
