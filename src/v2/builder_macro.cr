@@ -34,6 +34,8 @@ module CrCfgV2::BuilderMacro
       def self.coerce(original : AllTypes, intended_type : Class) : AllTypes
         return original if original.class == intended_type
 
+        # TODO: try and be more intelligent about types (i.e. if original is already of type Int, don't convert to String
+        # to then convert to Int32)
         return "#{original}".to_i32 if intended_type == Int32
         return "#{original}".to_i64 if intended_type == Int64
         return "#{original}".to_f32 if intended_type == Float32
@@ -48,6 +50,15 @@ module CrCfgV2::BuilderMacro
           if intended_type == Array({{i}})
             a = [] of {{i}}
             original.each { |x| a << coerce(x, {{i}}).as({{i}}) }
+            return a
+          end
+          {% end %}
+        elsif intended_type.to_s.starts_with?("Array(")
+          # Edge case, we have a single value that should really be in an array
+          {% for i in PrimitiveTypes.union_types %}
+          if intended_type == Array({{i}})
+            a = [] of {{i}}
+            a << coerce(original, {{i}}).as({{i}})
             return a
           end
           {% end %}
