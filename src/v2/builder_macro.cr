@@ -79,9 +79,9 @@ module CrCfgV2::BuilderMacro
         @_setters = {
         {% for name, props in CONFIG_PROPS %}
           {% if SUPPORTED_TYPES.includes?("#{props[:type].types[0]}") %}
-          "{{name}}" => ->(ignore : String, inst : {{@type}}Builder, x : AllTypes) { inst.{{name}} = coerce(x, {{props[:type].types[0]}}, "{{name}}").as({{props[:type].types[0]}}); nil },
+          "{{name}}".downcase => ->(ignore : String, inst : {{@type}}Builder, x : AllTypes) { inst.{{name}} = coerce(x, {{props[:type].types[0]}}, "{{name}}").as({{props[:type].types[0]}}); nil },
           {% else %}
-          "{{name}}" => ->(name : String, inst : {{@type}}Builder, x : AllTypes) { inst.{{name}}.set(name, x); nil },
+          "{{name}}".downcase => ->(name : String, inst : {{@type}}Builder, x : AllTypes) { inst.{{name}}.set(name, x); nil },
           {% end %}
         {% end %}
         } of String => Proc(String, {{@type}}Builder, AllTypes, Nil)
@@ -90,9 +90,9 @@ module CrCfgV2::BuilderMacro
       def set(name : String, val : AllTypes)
         if name.includes?('.')
           prop, rest = name.split(".", 2)
-          @_setters[prop].call(rest, self, val)
+          @_setters[prop.downcase].call(rest, self, val)
         else
-          @_setters[name].call("", self, val)
+          @_setters[name.downcase].call("", self, val)
         end
       end
 

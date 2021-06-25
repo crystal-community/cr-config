@@ -7,15 +7,16 @@ typed class. Goals are:
 - [ ] Auto generated config files if missing
 - [ ] New configurations automatically get added to config file if missing
 - [ ] Supports property loading hierarchy
-- [ ] * Supports loading from file
+- [X] * Supports loading from file
 - [X] ** Supports JSON
 - [X] ** Supports YAML
 - [X] ** Supports dotenv files
 - [ ] ** Load different config file based on environment
-- [ ] * Supports loading from environment variables
+- [X] * Supports loading from environment variables
 - [ ] * Supports loading from command line argument overrides (does not conflict with option_parser)
-- [ ] * hierarchy can be configured
+- [X] * hierarchy can be configured
 - [X] * can support custom config loaders
 - [ ] Supports runtime config overrides
 - [ ] Supports property validators
+- [ ] Supports lists of subconfigs
 
