@@ -1,0 +1,4 @@
+str_option: this is a string
+arr_int32:
+  - 20394
+  - 80980

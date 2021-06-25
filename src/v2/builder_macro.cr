@@ -4,7 +4,6 @@ module CrCfgV2::BuilderMacro
   class ConfigException < Exception
     enum Type
       ConfigNotFound
-      OptionNotFound
       ParseError
     end
 
@@ -31,7 +30,7 @@ module CrCfgV2::BuilderMacro
 
       {% end %}
 
-      def self.coerce(original : AllTypes, intended_type : Class) : AllTypes
+      def self.coerce(original : AllTypes, intended_type : Class, name_for_error : String) : AllTypes
         return original if original.class == intended_type
 
         # TODO: try and be more intelligent about types (i.e. if original is already of type Int, don't convert to String
@@ -49,7 +48,7 @@ module CrCfgV2::BuilderMacro
           {% for i in PrimitiveTypes.union_types %}
           if intended_type == Array({{i}})
             a = [] of {{i}}
-            original.each { |x| a << coerce(x, {{i}}).as({{i}}) }
+            original.each { |x| a << coerce(x, {{i}}, name_for_error).as({{i}}) }
             return a
           end
           {% end %}
@@ -58,14 +57,14 @@ module CrCfgV2::BuilderMacro
           {% for i in PrimitiveTypes.union_types %}
           if intended_type == Array({{i}})
             a = [] of {{i}}
-            a << coerce(original, {{i}}).as({{i}})
+            a << coerce(original, {{i}}, name_for_error).as({{i}})
             return a
           end
           {% end %}
         end
 
         # Compiler should protect us here
-        raise "Unable to coerce '#{original}' into a type of #{intended_type}"
+        raise ConfigException.new(name_for_error, ConfigException::Type::ParseError, "Unable to coerce '#{original}' into a type of #{intended_type}")
       end
 
       {% for name, props in CONFIG_PROPS %}
@@ -80,7 +79,7 @@ module CrCfgV2::BuilderMacro
         @_setters = {
         {% for name, props in CONFIG_PROPS %}
           {% if SUPPORTED_TYPES.includes?("#{props[:type].types[0]}") %}
-          "{{name}}" => ->(ignore : String, inst : {{@type}}Builder, x : AllTypes) { inst.{{name}} = coerce(x, {{props[:type].types[0]}}).as({{props[:type].types[0]}}); nil },
+          "{{name}}" => ->(ignore : String, inst : {{@type}}Builder, x : AllTypes) { inst.{{name}} = coerce(x, {{props[:type].types[0]}}, "{{name}}").as({{props[:type].types[0]}}); nil },
           {% else %}
           "{{name}}" => ->(name : String, inst : {{@type}}Builder, x : AllTypes) { inst.{{name}}.set(name, x); nil },
           {% end %}
