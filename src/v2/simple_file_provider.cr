@@ -4,6 +4,8 @@ module CrCfgV2
     end
 
     def populate(bob : AbstractBuilder)
+      return unless File.exists?(@file_name)
+
       file_contents = File.read(@file_name)
 
       case @file_name

@@ -11,7 +11,7 @@ typed class. Goals are:
 - [X] ** Supports JSON
 - [X] ** Supports YAML
 - [X] ** Supports dotenv files
-- [ ] ** Load different config file based on environment
+- [X] ** Load different config file based on environment
 - [X] * Supports loading from environment variables
 - [ ] * Supports loading from command line argument overrides (does not conflict with option_parser)
 - [X] * hierarchy can be configured
