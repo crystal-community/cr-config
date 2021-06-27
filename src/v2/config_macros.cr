@@ -18,10 +18,12 @@ module CrCfgV2
 
   macro option(name, default = nil)
     {% CONFIG_PROPS[name.var] = {
-         name:    name.var,
-         type:    name.type,
-         nilable: name.type.types.map { |x| "#{x.id}" }.includes?("Nil"),
-         default: default,
+         name:         name.var,
+         type:         name.type,
+         is_base_type: SUPPORTED_TYPES.includes?("#{name.type.types[0]}"),
+         base_type:    name.type.types[0],
+         nilable:      name.type.types.map { |x| "#{x.id}" }.includes?("Nil"),
+         default:      default,
        } %}
   end
 
@@ -35,11 +37,10 @@ module CrCfgV2
       rest = ""
       true_key, rest = key.split('.', 2) if key.includes?('.')
 
-
       {% begin %}
       case true_key
       {% for name, props in CONFIG_PROPS %}
-      {% if SUPPORTED_TYPES.includes?("#{props[:type].types[0]}") %}
+      {% if props[:is_base_type] %}
       when "{{name}}"
         # If we're here, and there's a '.' in the initial key, we're treating a primitive as a subconfiguration
         return nil if key.includes?('.')
