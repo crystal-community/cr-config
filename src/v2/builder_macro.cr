@@ -1,10 +1,12 @@
 require "./abstract_provider.cr"
+require "csv" # Used for parsing strings => Array(String) (let it deal with double quotes and whatnot)
 
 module CrCfgV2::BuilderMacro
   class ConfigException < Exception
     enum Type
       ConfigNotFound
       ParseError
+      ArrayToString
     end
 
     getter :name, :type, :parse_message
@@ -36,6 +38,13 @@ module CrCfgV2::BuilderMacro
       def self.coerce(original : AllTypes, intended_type : Class, name_for_error : String) : AllTypes
         return original if original.class == intended_type
 
+        # Edge case that needs to be handled before the below block:
+        # If original is an array and the intended type is a String, throw an exception, as it's unclear in what way the
+        # array should be reformatted back into a String
+        if original.is_a?(Array) && intended_type == String
+          raise ConfigException.new(name_for_error, ConfigException::Type::ArrayToString, "Unable to coerce '#{original}' into a type of String, is currently a #{original.class}")
+        end
+
         # TODO: try and be more intelligent about types (i.e. if original is already of type Int, don't convert to String
         # to then convert to Int32)
         return "#{original}".to_i32 if intended_type == Int32
@@ -46,6 +55,10 @@ module CrCfgV2::BuilderMacro
         return "#{original}".to_f64 if intended_type == Float64
         return original.to_s if intended_type == String
         return ("#{original}" == "true" ? true : false) if intended_type == Bool
+
+        if intended_type.to_s.starts_with?("Array(") && original.is_a?(String)
+          original = CSV.parse(original)[0]
+        end
 
         if original.is_a?(Array) && intended_type.to_s.starts_with?("Array(")
           {% for i in PrimitiveTypes.union_types %}
@@ -71,11 +84,11 @@ module CrCfgV2::BuilderMacro
           return ["#{original}".to_f64] if intended_type == Array(Float64)
           return ["#{original}".to_u32] if intended_type == Array(UInt32)
           return ["#{original}".to_u64] if intended_type == Array(UInt64)
-          return [original.to_s] if intended_type == Array(String)
           return ["#{original}" == "true" ? true : false] if intended_type == Array(Bool)
+          return [original.to_s] if intended_type == Array(String)
         end
 
-        # Compiler should prevent us from getting here
+        # We can get here if original is an array and the intended_type isn't
         raise ConfigException.new(name_for_error, ConfigException::Type::ParseError, "Unable to coerce '#{original}' into a type of #{intended_type}, is currently a #{original.class}")
       end
 
@@ -98,6 +111,7 @@ module CrCfgV2::BuilderMacro
           {% if props[:is_base_type] %}
           when "{{name.downcase}}"
             @{{name}} = {{@type}}Builder.coerce(val, {{props[:base_type]}}, "{{name}}").as({{props[:base_type]}})
+            return true
           {% else %}
           when "{{name.downcase}}"
             # Check if we were able to parse a subpath from the given path
@@ -109,6 +123,7 @@ module CrCfgV2::BuilderMacro
           # purposely ignore trying to set non-existent values. Could be a dirty config, but not a reason to crash the server
         end
         {% end %}
+        return false
       end
 
       def validate_settings

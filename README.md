@@ -6,14 +6,14 @@ typed class. Goals are:
 - [X] Declarative construction of config files (through macro driven classes)
 - [ ] Auto generated config files if missing
 - [ ] New configurations automatically get added to config file if missing
-- [ ] Supports property loading hierarchy
+- [X] Supports property loading hierarchy
 - [X] * Supports loading from file
 - [X] ** Supports JSON
 - [X] ** Supports YAML
 - [X] ** Supports dotenv files
 - [X] ** Load different config file based on environment
 - [X] * Supports loading from environment variables
-- [ ] * Supports loading from command line argument overrides (does not conflict with option_parser)
+- [X] * Supports loading from command line argument overrides (does not conflict with option_parser)
 - [X] * hierarchy can be configured
 - [X] * can support custom config loaders
 - [ ] Supports runtime config overrides

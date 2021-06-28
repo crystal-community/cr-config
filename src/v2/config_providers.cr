@@ -6,6 +6,10 @@ module CrCfgV2::ConfigProvider
       PROVIDERS << provider
     end
 
+    def self.provider(&block : AbstractBuilder -> Nil)
+      PROVIDERS << ProcProvider.new(block)
+    end
+
     def self.providers
       yield PROVIDERS
     end
