@@ -11,7 +11,7 @@ end
 describe "Simple File Provider" do
   it "parses json" do
     SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.register_provider(CrCfgV2::SimpleFileProvider.new("spec/v2/test_files/simple_file_provider_spec/test.json"))
+    SimpleFileProviderConfig.provider(CrCfgV2::SimpleFileProvider.new("spec/v2/test_files/simple_file_provider_spec/test.json"))
 
     s = SimpleFileProviderConfig.load
 
@@ -22,7 +22,7 @@ describe "Simple File Provider" do
 
   it "parses yaml" do
     SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.register_provider(CrCfgV2::SimpleFileProvider.new("spec/v2/test_files/simple_file_provider_spec/test.yaml"))
+    SimpleFileProviderConfig.provider(CrCfgV2::SimpleFileProvider.new("spec/v2/test_files/simple_file_provider_spec/test.yaml"))
 
     s = SimpleFileProviderConfig.load
 
@@ -33,7 +33,7 @@ describe "Simple File Provider" do
 
   it "parses env" do
     SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.register_provider(CrCfgV2::SimpleFileProvider.new("spec/v2/test_files/simple_file_provider_spec/test.env"))
+    SimpleFileProviderConfig.provider(CrCfgV2::SimpleFileProvider.new("spec/v2/test_files/simple_file_provider_spec/test.env"))
 
     s = SimpleFileProviderConfig.load
 
@@ -47,8 +47,12 @@ end
 describe "Config Builder" do
   it "merges multiple sources" do
     SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.register_provider(CrCfgV2::DotenvProvider.new("str_option=this is a string"))
-    SimpleFileProviderConfig.register_provider(CrCfgV2::DotenvProvider.new("arr_int32=3"))
+    SimpleFileProviderConfig.providers do
+      [
+        CrCfgV2::DotenvProvider.new("str_option=this is a string"),
+        CrCfgV2::DotenvProvider.new("arr_int32=3"),
+      ]
+    end
 
     s = SimpleFileProviderConfig.load
 
@@ -69,9 +73,13 @@ describe "Config Builder" do
 
   it "uses config precedence" do
     SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.register_provider(CrCfgV2::DotenvProvider.new("str_option=this is a string"))
-    SimpleFileProviderConfig.register_provider(CrCfgV2::DotenvProvider.new("arr_int32=3"))
-    SimpleFileProviderConfig.register_provider(CrCfgV2::DotenvProvider.new("arr_int32=5, 6, 7"))
+    SimpleFileProviderConfig.providers do
+      [
+        CrCfgV2::DotenvProvider.new("str_option=this is a string"),
+        CrCfgV2::DotenvProvider.new("arr_int32=3"),
+        CrCfgV2::DotenvProvider.new("arr_int32=5, 6, 7"),
+      ]
+    end
 
     s = SimpleFileProviderConfig.load
 

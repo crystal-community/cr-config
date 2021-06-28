@@ -17,9 +17,8 @@ end
 
 describe "Command Line Parser" do
   it "parses from ARGV" do
-    ArgvConfig.providers do |providers|
-      providers.clear
-      providers << CrCfgV2::CommandLineParser.new
+    ArgvConfig.providers do
+      CrCfgV2::CommandLineParser.new
     end
 
     before_size = ARGV.size

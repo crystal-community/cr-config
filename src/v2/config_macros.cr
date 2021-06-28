@@ -86,7 +86,7 @@ module CrCfgV2
       def self.load
         bob = {{@type}}Builder.new
 
-        PROVIDERS.each do |provider|
+        @@_providers.each do |provider|
           provider.populate(bob)
         end
 

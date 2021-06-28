@@ -118,7 +118,7 @@ end
 describe "CrCfg V2" do
   it "gets setup by the dumb provider" do
     Test.providers.clear
-    Test.register_provider(DumbConfigProvider.new)
+    Test.provider(DumbConfigProvider.new)
 
     t1 = Test.load
     t1.prop1.should be_nil
@@ -134,7 +134,7 @@ describe "CrCfg V2" do
 
   it "parses and sets JSON" do
     Test.providers.clear
-    Test.register_provider(CrCfgV2::JsonProvider.new(json_raw))
+    Test.provider(CrCfgV2::JsonProvider.new(json_raw))
 
     t = Test.load
     t.prop1.should eq "test"
@@ -149,7 +149,7 @@ describe "CrCfg V2" do
 
   it "parses and sets YAML" do
     Test.providers.clear
-    Test.register_provider(CrCfgV2::YamlProvider.new(yaml_raw))
+    Test.provider(CrCfgV2::YamlProvider.new(yaml_raw))
 
     t = Test.load
     t.prop1.should eq "test"
@@ -164,7 +164,7 @@ describe "CrCfg V2" do
 
   it "parses and sets Dotenv" do
     Test.providers.clear
-    Test.register_provider(CrCfgV2::DotenvProvider.new(dotenv_raw))
+    Test.provider(CrCfgV2::DotenvProvider.new(dotenv_raw))
 
     t = Test.load
     t.prop1.should eq "\"test\"" # dotenv files will keep quotes around strings
@@ -179,7 +179,7 @@ describe "CrCfg V2" do
 
   it "parses dotenv strings with commas" do
     Test.providers.clear
-    Test.register_provider(CrCfgV2::DotenvProvider.new(dotenv_raw + "\nprop1 = test, string with,a,comma"))
+    Test.provider(CrCfgV2::DotenvProvider.new(dotenv_raw + "\nprop1 = test, string with,a,comma"))
 
     t = Test.load
     t.prop1.should eq "test, string with,a,comma"

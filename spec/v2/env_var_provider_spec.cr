@@ -17,9 +17,8 @@ end
 
 describe "Environment Variable Provider" do
   it "parses environment variables" do
-    EnvVarProviderSpec.providers do |providers|
-      providers.clear
-      providers << CrCfgV2::EnvVarProvider.new
+    EnvVarProviderSpec.providers do
+      CrCfgV2::EnvVarProvider.new
     end
 
     ENV["MYUINT"] = "999999999999"
