@@ -23,14 +23,13 @@ module CrCfgV2::BuilderMacro
       macro _get_default_for_type(default, type)
         {% if default != nil %}
           {{default}}
-        {% elsif !SUPPORTED_TYPES.includes?("#{type}") %}
-          {{type}}::{{type}}Builder.new
         {% else %}
           nil
         {% end %}
       end
 
       {% end %}
+
 
       # NOTE: The compiler is not nice if you try to be too clever and abstract out these common blocks of casting
       # into another macro / method / recursively, and compile times may increase. Compile with `--stats` to see
@@ -94,11 +93,23 @@ module CrCfgV2::BuilderMacro
 
       {% for name, props in CONFIG_PROPS %}
       {% if props[:is_base_type] %}
-      property {{name}} : {{props[:type]}}{% unless props[:nilable] %}?{% end %} = _get_default_for_type({{props[:default]}}, {{props[:base_type]}})
+      property {{name}} : {{props[:type]}}{% unless props[:nilable] %}?{% end %}
       {% else %}
-      property {{name}} : {{props[:base_type]}}::{{props[:base_type]}}Builder = _get_default_for_type({{props[:default]}}, {{props[:base_type]}})
+      property {{name}} : {{props[:base_type]}}::{{props[:base_type]}}Builder
       {% end %}
       {% end %}
+
+      @_base_name : String
+
+      def initialize(@_base_name : String)
+        {% for name, props in CONFIG_PROPS %}
+        {% if props[:is_base_type] %}
+        @{{name}} = _get_default_for_type({{props[:default]}}, {{props[:base_type]}})
+        {% else %}
+        @{{name}} = {{props[:base_type]}}::{{props[:base_type]}}Builder.new("#{@_base_name}{{name}}.")
+        {% end %}
+        {% end %}
+      end
 
       def set(name : String, val : AllTypes)
         if name.includes?('.')
@@ -141,6 +152,7 @@ module CrCfgV2::BuilderMacro
         validate_settings
 
         {{@type}}.new(
+          @_base_name,
           {% for name, props in CONFIG_PROPS %}
           {% if props[:is_base_type] %}
           @{{name}}{% if !props[:nilable] %}.not_nil!{% end %},

@@ -29,7 +29,21 @@ module CrCfgV2
 
   macro _generate_getters
     {% for name, val in CONFIG_PROPS %}
+      {% if val[:is_base_type] %}
+      @{{name}} : {{val[:type]}}
+
+      def {{name}} : {{val[:type]}}
+        full_name = @_names["{{name}}"]
+        @@_runtime_interceptors.each do |proc|
+          if p = proc.call(full_name, @{{name}})
+            return p.as({{val[:base_type]}})
+          end
+        end
+        @{{name}}
+      end
+      {% else %}
       getter {{name}} : {{val[:type]}}
+      {% end %}
     {% end %}
 
     def []?(key : String)
@@ -44,7 +58,7 @@ module CrCfgV2
       when "{{name}}"
         # If we're here, and there's a '.' in the initial key, we're treating a primitive as a subconfiguration
         return nil if key.includes?('.')
-        return @{{name}}
+        return {{name}}
       {% else %}
       when "{{name}}"
         return @{{name}}[rest]
@@ -65,9 +79,16 @@ module CrCfgV2
   end
 
   macro _generate_constructor
-    def initialize({% for name, prop in CONFIG_PROPS %}
+    def initialize(base_name : String, {% for name, prop in CONFIG_PROPS %}
       @{{name}} : {{prop[:type]}},
     {% end %})
+      # property name to fully qualified name (i.e. "prop2" => "prop1.sub.prop2")
+      @_names = {} of String => String
+      {% for name, prop in CONFIG_PROPS %}
+      {% if prop[:is_base_type] %}
+      @_names["{{name}}"] = "#{base_name}{{name}}"
+      {% end %}
+      {% end %}
     end
   end
 
@@ -84,7 +105,7 @@ module CrCfgV2
       _generate_config_providers
 
       def self.load
-        bob = {{@type}}Builder.new
+        bob = {{@type}}Builder.new("")
 
         @@_providers.each do |provider|
           provider.populate(bob)
