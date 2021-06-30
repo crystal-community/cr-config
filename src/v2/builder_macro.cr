@@ -7,6 +7,7 @@ module CrCfgV2::BuilderMacro
       ConfigNotFound
       ParseError
       ArrayToString
+      CustomValidationError
     end
 
     getter :name, :type, :parse_message
@@ -137,7 +138,7 @@ module CrCfgV2::BuilderMacro
         return false
       end
 
-      def validate_settings
+      private def validate_settings(validators)
         # TODO: gracefully generate a new config?
         {% for name, props in CONFIG_PROPS %}
         {% unless props[:nilable] %}
@@ -146,10 +147,26 @@ module CrCfgV2::BuilderMacro
         end
         {% end %}
         {% end %}
+
+        {% for name, props in CONFIG_PROPS %}
+        {% if props[:is_base_type] %}
+        begin
+          validators.each do |validator|
+            validator.call("#{@_base_name}{{name}}", @{{name}})
+          end
+        rescue e : ConfigException
+          raise e
+        rescue e : Exception
+          raise ConfigException.new("{{name}}", ConfigException::Type::CustomValidationError, e.message || e.to_s)
+        end
+        {% end %}
+        {% end %}
       end
 
-      def build
-        validate_settings
+      def build(validators = {{@type}}._validators, interceptors = {{@type}}._runtime_interceptors)
+        validate_settings(validators)
+
+        {{@type}}._runtime_interceptors = interceptors
 
         {{@type}}.new(
           @_base_name,
@@ -157,7 +174,7 @@ module CrCfgV2::BuilderMacro
           {% if props[:is_base_type] %}
           @{{name}}{% if !props[:nilable] %}.not_nil!{% end %},
           {% else %}
-          @{{name}}.build,
+          @{{name}}.build(validators, interceptors),
           {% end %}
           {% end %}
         )

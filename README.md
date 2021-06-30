@@ -16,7 +16,7 @@ typed class. Goals are:
 - [X] * Supports loading from command line argument overrides (does not conflict with option_parser)
 - [X] * hierarchy can be configured
 - [X] * can support custom config loaders
-- [ ] Supports runtime config overrides
-- [ ] Supports property validators
+- [X] Supports runtime config overrides
+- [X] Supports property validators
 - [ ] Supports lists of subconfigs
 
