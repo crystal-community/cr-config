@@ -1,4 +1,4 @@
-require "../spec_helper"
+require "./spec_helper"
 
 class FolderConfigProviderSpec
   include CrCfgV2
@@ -10,7 +10,7 @@ describe "File Config Provider" do
   it "loads a single file" do
     FolderConfigProviderSpec.providers do
       CrCfgV2::FolderConfigProvider.new
-        .folder("spec/v2/test_files/configs")
+        .folder("spec/test_files/configs")
         .base_file("config.env")
     end
 
@@ -22,7 +22,7 @@ describe "File Config Provider" do
   it "loads files in a particular order" do
     FolderConfigProviderSpec.providers do
       CrCfgV2::FolderConfigProvider.new
-        .folder("spec/v2/test_files/configs")
+        .folder("spec/test_files/configs")
         .base_file("config.env")
         .separator("-")
         .profiles do
@@ -36,7 +36,7 @@ describe "File Config Provider" do
 
     FolderConfigProviderSpec.providers do
       CrCfgV2::FolderConfigProvider.new
-        .folder("spec/v2/test_files/configs")
+        .folder("spec/test_files/configs")
         .base_file("config.env")
         .separator("-")
         .profiles do

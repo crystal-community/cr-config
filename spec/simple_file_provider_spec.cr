@@ -1,4 +1,4 @@
-require "../spec_helper"
+require "./spec_helper"
 
 class SimpleFileProviderConfig
   include CrCfgV2
@@ -11,7 +11,7 @@ end
 describe "Simple File Provider" do
   it "parses json" do
     SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.provider(CrCfgV2::SimpleFileProvider.new("spec/v2/test_files/simple_file_provider_spec/test.json"))
+    SimpleFileProviderConfig.provider(CrCfgV2::SimpleFileProvider.new("spec/test_files/simple_file_provider_spec/test.json"))
 
     s = SimpleFileProviderConfig.load
 
@@ -22,7 +22,7 @@ describe "Simple File Provider" do
 
   it "parses yaml" do
     SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.provider(CrCfgV2::SimpleFileProvider.new("spec/v2/test_files/simple_file_provider_spec/test.yaml"))
+    SimpleFileProviderConfig.provider(CrCfgV2::SimpleFileProvider.new("spec/test_files/simple_file_provider_spec/test.yaml"))
 
     s = SimpleFileProviderConfig.load
 
@@ -33,7 +33,7 @@ describe "Simple File Provider" do
 
   it "parses env" do
     SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.provider(CrCfgV2::SimpleFileProvider.new("spec/v2/test_files/simple_file_provider_spec/test.env"))
+    SimpleFileProviderConfig.provider(CrCfgV2::SimpleFileProvider.new("spec/test_files/simple_file_provider_spec/test.env"))
 
     s = SimpleFileProviderConfig.load
 

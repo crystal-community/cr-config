@@ -1,4 +1,4 @@
-require "../spec_helper"
+require "./spec_helper"
 
 class Test
   include CrCfgV2
