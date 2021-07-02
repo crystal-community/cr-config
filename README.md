@@ -1,4 +1,6 @@
 # Crystal Config
+Find the full documentation [here](http://troy.sornson.io/cr-config/#examples)
+
 This library aims to provide robust configuration management for long running crystal processes
 where a CLI interface isn't enough. It aims to provide these configurations through a strongly
 typed class. Goals are:
