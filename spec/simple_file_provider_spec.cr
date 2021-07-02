@@ -11,7 +11,7 @@ end
 describe "Simple File Provider" do
   it "parses json" do
     SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.provider(CrCfgV2::SimpleFileProvider.new("spec/test_files/simple_file_provider_spec/test.json"))
+    SimpleFileProviderConfig.provider(CrCfgV2::Providers::SimpleFileProvider.new("spec/test_files/simple_file_provider_spec/test.json"))
 
     s = SimpleFileProviderConfig.load
 
@@ -22,7 +22,7 @@ describe "Simple File Provider" do
 
   it "parses yaml" do
     SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.provider(CrCfgV2::SimpleFileProvider.new("spec/test_files/simple_file_provider_spec/test.yaml"))
+    SimpleFileProviderConfig.provider(CrCfgV2::Providers::SimpleFileProvider.new("spec/test_files/simple_file_provider_spec/test.yaml"))
 
     s = SimpleFileProviderConfig.load
 
@@ -33,7 +33,7 @@ describe "Simple File Provider" do
 
   it "parses env" do
     SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.provider(CrCfgV2::SimpleFileProvider.new("spec/test_files/simple_file_provider_spec/test.env"))
+    SimpleFileProviderConfig.provider(CrCfgV2::Providers::SimpleFileProvider.new("spec/test_files/simple_file_provider_spec/test.env"))
 
     s = SimpleFileProviderConfig.load
 
@@ -49,8 +49,8 @@ describe "Config Builder" do
     SimpleFileProviderConfig.providers.clear
     SimpleFileProviderConfig.providers do
       [
-        CrCfgV2::DotenvProvider.new("str_option=this is a string"),
-        CrCfgV2::DotenvProvider.new("arr_int32=3"),
+        CrCfgV2::Providers::DotenvProvider.new("str_option=this is a string"),
+        CrCfgV2::Providers::DotenvProvider.new("arr_int32=3"),
       ]
     end
 
@@ -75,9 +75,9 @@ describe "Config Builder" do
     SimpleFileProviderConfig.providers.clear
     SimpleFileProviderConfig.providers do
       [
-        CrCfgV2::DotenvProvider.new("str_option=this is a string"),
-        CrCfgV2::DotenvProvider.new("arr_int32=3"),
-        CrCfgV2::DotenvProvider.new("arr_int32=5, 6, 7"),
+        CrCfgV2::Providers::DotenvProvider.new("str_option=this is a string"),
+        CrCfgV2::Providers::DotenvProvider.new("arr_int32=3"),
+        CrCfgV2::Providers::DotenvProvider.new("arr_int32=5, 6, 7"),
       ]
     end
 

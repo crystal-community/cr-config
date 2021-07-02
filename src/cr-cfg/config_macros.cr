@@ -1,30 +1,57 @@
-require "./builder_macro.cr"
-require "./config_providers.cr"
+module CrCfgV2::Macros
+  macro _generate_config_providers
+    @@_runtime_interceptors = [] of Proc(String, AllTypes?, AllTypes?)
+    @@_providers = [] of Providers::AbstractProvider
+    @@_validators = [] of Proc(String, AllTypes?, Nil)
+    @@_instance : {{@type}}?
+    class_getter _validators
+    class_property _runtime_interceptors
 
-module CrCfgV2
-  include BuilderMacro
-  include ConfigProvider
+    def self.instance : {{@type}}
+      if i = @@_instance
+        return i
+      end
+      @@_instance = self.load
+      @@_instance.not_nil!
+    end
 
-  alias PrimitiveTypes = String | Int32 | Int64 | Float32 | Float64 | Bool | UInt32 | UInt64
+    def self.reset
+      @@_runtime_interceptors.clear
+      @@_providers.clear
+      @@_validators.clear
+      @@_instance = nil
+    end
 
-  {% begin %}
-  alias AllTypes = PrimitiveTypes {% for t in PrimitiveTypes.union_types %}| Array({{t}}) {% end %}
-  {% end %}
-  {% begin %}
-  SUPPORTED_TYPES = { {% for t in AllTypes.union_types %}"{{t}}",{% end %}}
-  {% end %}
+    def self.validator(&block : (String, AllTypes?) -> Nil)
+      @@_validators << block
+    end
 
-  Array(String) | Array(Int32) | Array(Int64) | Array(Float32) | Array(Float64) | Array(Bool) | Array(UInt32) | Array(UInt64)
+    def self.runtime_interceptor(&block : (String, AllTypes?) -> AllTypes?)
+      @@_runtime_interceptors << block
+    end
 
-  macro option(name, default = nil)
-    {% CONFIG_PROPS[name.var] = {
-         name:         name.var,
-         type:         name.type,
-         is_base_type: SUPPORTED_TYPES.includes?("#{name.type.types[0]}"),
-         base_type:    name.type.types[0],
-         nilable:      name.type.types.map { |x| "#{x.id}" }.includes?("Nil"),
-         default:      default,
-       } %}
+    def self.provider(provider : Providers::AbstractProvider)
+      @@_providers << provider
+      {{@type}}
+    end
+
+    def self.provider(&block : AbstractBuilder -> Nil)
+      @@_providers << Providers::ProcProvider.new(block)
+      {{@type}}
+    end
+
+    def self.providers(&block)
+      providers = yield
+      if providers.is_a?(Array)
+        @@_providers = providers.map &.as(Providers::AbstractProvider)
+      elsif providers.is_a?(Providers::AbstractProvider)
+        @@_providers = [providers.as(Providers::AbstractProvider)]
+      end
+    end
+
+    def self.providers
+      @@_providers
+    end
   end
 
   macro _validate_properties
@@ -100,32 +127,6 @@ module CrCfgV2
       @_names["{{name}}"] = "#{base_name}{{name}}"
       {% end %}
       {% end %}
-    end
-  end
-
-  macro included
-    CONFIG_PROPS = {} of Nil => Nil
-
-    macro finished
-      _validate_properties
-
-      _generate_getters
-
-      _generate_constructor
-
-      _generate_builder
-
-      _generate_config_providers
-
-      def self.load
-        bob = {{@type.id.split("::")[-1].id}}ConfigBuilder.new("")
-
-        @@_providers.each do |provider|
-          provider.populate(bob)
-        end
-
-        bob.build
-      end
     end
   end
 end

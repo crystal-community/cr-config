@@ -100,7 +100,7 @@ json_raw = <<-EOF
 }
 EOF
 
-class DumbConfigProvider < CrCfgV2::AbstractProvider
+class DumbConfigProvider < CrCfgV2::Providers::AbstractProvider
   def populate(bob : CrCfgV2::AbstractBuilder)
     bob.set("prop2", 3)
     bob.set("prop3", 4.to_i64)
@@ -143,7 +143,7 @@ describe "CrCfg V2" do
 
   it "parses and sets JSON" do
     Test.providers.clear
-    Test.provider(CrCfgV2::JsonProvider.new(json_raw))
+    Test.provider(CrCfgV2::Providers::JsonProvider.new(json_raw))
 
     t = Test.load
     t.prop1.should eq "test"
@@ -158,7 +158,7 @@ describe "CrCfg V2" do
 
   it "parses and sets YAML" do
     Test.providers.clear
-    Test.provider(CrCfgV2::YamlProvider.new(yaml_raw))
+    Test.provider(CrCfgV2::Providers::YamlProvider.new(yaml_raw))
 
     t = Test.load
     t.prop1.should eq "test"
@@ -173,7 +173,7 @@ describe "CrCfg V2" do
 
   it "parses and sets Dotenv" do
     Test.providers.clear
-    Test.provider(CrCfgV2::DotenvProvider.new(dotenv_raw))
+    Test.provider(CrCfgV2::Providers::DotenvProvider.new(dotenv_raw))
 
     t = Test.load
     t.prop1.should eq "\"test\"" # dotenv files will keep quotes around strings
@@ -188,7 +188,7 @@ describe "CrCfg V2" do
 
   it "parses dotenv strings with commas" do
     Test.providers.clear
-    Test.provider(CrCfgV2::DotenvProvider.new(dotenv_raw + "\nprop1 = test, string with,a,comma"))
+    Test.provider(CrCfgV2::Providers::DotenvProvider.new(dotenv_raw + "\nprop1 = test, string with,a,comma"))
 
     t = Test.load
     t.prop1.should eq "test, string with,a,comma"
