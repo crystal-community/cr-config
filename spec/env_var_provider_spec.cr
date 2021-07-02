@@ -1,14 +1,14 @@
 require "./spec_helper"
 
 class EnvVarProviderSpec
-  include CrCfgV2
+  include CrConfig
 
   option myUint : UInt64
   option mySubConfig : SubEnvVarConfig
 end
 
 class SubEnvVarConfig
-  include CrCfgV2
+  include CrConfig
 
   option someString : String?
   option someFloat : Float64
@@ -18,7 +18,7 @@ end
 describe "Environment Variable Provider" do
   it "parses environment variables" do
     EnvVarProviderSpec.providers do
-      CrCfgV2::Providers::EnvVarProvider.new
+      CrConfig::Providers::EnvVarProvider.new
     end
 
     ENV["MYUINT"] = "999999999999"

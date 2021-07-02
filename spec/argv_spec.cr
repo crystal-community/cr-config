@@ -1,7 +1,7 @@
 require "./spec_helper"
 
 class ArgvConfig
-  include CrCfgV2
+  include CrConfig
 
   option myString : String
   option myArr : Array(Int64)
@@ -10,7 +10,7 @@ class ArgvConfig
 end
 
 class ArgvSubConfig
-  include CrCfgV2
+  include CrConfig
 
   option importantThing : Float32
 end
@@ -18,7 +18,7 @@ end
 describe "Command Line Parser" do
   it "parses from ARGV" do
     ArgvConfig.providers do
-      CrCfgV2::Providers::CommandLineParser.new
+      CrConfig::Providers::CommandLineParser.new
     end
 
     before_size = ARGV.size

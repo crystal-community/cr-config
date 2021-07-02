@@ -1,14 +1,14 @@
 require "./spec_helper"
 
 class ValidatorConfig
-  include CrCfgV2
+  include CrConfig
 
   option myStrings : Array(String)
   option sub : ValidatorSubConfig
 end
 
 class ValidatorSubConfig
-  include CrCfgV2
+  include CrConfig
 
   option myFloats : Array(Float64)
 end
@@ -33,9 +33,9 @@ describe "Validators" do
     begin
       v = ValidatorConfig.load
       fail("Should have received an exception during configuration loading")
-    rescue e : CrCfgV2::ConfigException
+    rescue e : CrConfig::ConfigException
       e.message.not_nil!.should end_with "[\"yes\"] is an invalid config!"
-      e.type.should eq CrCfgV2::ConfigException::Type::CustomValidationError
+      e.type.should eq CrConfig::ConfigException::Type::CustomValidationError
       e.name.should eq "myStrings"
     end
   end

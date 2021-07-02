@@ -1,4 +1,4 @@
 require "yaml"
 require "json"
 
-require "./cr-cfg/**"
+require "./cr-config/**"

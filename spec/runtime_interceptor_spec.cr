@@ -1,14 +1,14 @@
 require "./spec_helper"
 
 class RuntimeInterceptorConfig
-  include CrCfgV2
+  include CrConfig
 
   option myString : String
   option sub : RuntimeInterceptorSubConfig
 end
 
 class RuntimeInterceptorSubConfig
-  include CrCfgV2
+  include CrConfig
 
   option myInts : Array(Int32)
 end

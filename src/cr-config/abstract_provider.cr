@@ -1,7 +1,7 @@
 require "json"
 require "yaml"
 
-module CrCfgV2
+module CrConfig
   abstract class AbstractBuilder
     abstract def build
 
@@ -185,7 +185,7 @@ module CrCfgV2
             profile = "#{@profile_separator}#{profile}" if profile.size > 0
             file_name = "#{name}#{profile}.#{suffix}"
 
-            s = CrCfgV2::Providers::SimpleFileProvider.new("#{@folder_path}/#{file_name}")
+            s = CrConfig::Providers::SimpleFileProvider.new("#{@folder_path}/#{file_name}")
 
             s.populate(bob)
           end

@@ -26,10 +26,10 @@ typed class. Goals are:
 ## Defining a configuration class
 
 ```crystal
-require "cr-cfg"
+require "cr-config"
 
 class ServerConfig
-  include CrCfgV2
+  include CrConfig
 
   option domain : String
   option ports : Array(Int32)
@@ -40,7 +40,7 @@ class ServerConfig
 end
 
 class ClientConfig
-  include CrCfgV2
+  include CrConfig
 
   option host : String
   option port : Int32?
@@ -48,7 +48,7 @@ class ClientConfig
 end
 
 class Database
-  include CrCfgV2
+  include CrConfig
 
   option hostname : String, default: "localhost"
   option port : Int32
@@ -89,9 +89,9 @@ Crystal Config provides a list of some standard ones, but also provides a way fo
 # Last config provider wins.
 ServerConfig.providers do
   [
-    CrCfgV2::SimpleFileProvider("config.json"), # This will read a named config file, supporting json, yaml, and .env file formats
-    CrCfgV2::EnvVarProvider.new,                # Let environment variables set (and override) configuration values
-    CrCfgV2::CommandLineParser.new              # Let the command line start up of the server also provide a way to override config values (useful for devs)
+    CrConfig::SimpleFileProvider("config.json"), # This will read a named config file, supporting json, yaml, and .env file formats
+    CrConfig::EnvVarProvider.new,                # Let environment variables set (and override) configuration values
+    CrConfig::CommandLineParser.new              # Let the command line start up of the server also provide a way to override config values (useful for devs)
   ]
 end
 

@@ -1,4 +1,4 @@
-module CrCfgV2::Macros
+module CrConfig::Macros
   macro _generate_config_providers
     @@_runtime_interceptors = [] of Proc(String, AllTypes?, AllTypes?)
     @@_providers = [] of Providers::AbstractProvider
@@ -58,9 +58,9 @@ module CrCfgV2::Macros
     {% for name, props in CONFIG_PROPS %}
       {% base_type = props[:base_type].id %}
       {% possible_base_type = @type.id.includes?("::") ? "#{@type.id.split("::")[0..-2].join("::").id}::#{base_type}".id : base_type %}
-      {% sub_configs = CrCfgV2.includers.map { |x| x.id } %}
+      {% sub_configs = CrConfig.includers.map { |x| x.id } %}
       {% unless SUPPORTED_TYPES.includes?("#{base_type}") || sub_configs.includes?(base_type) || sub_configs.includes?(possible_base_type) %}
-        {% raise "Property #{name} in #{@type} is not a supported type (#{base_type}). Config types allowed are #{SUPPORTED_TYPES}, or any includers of CrCfgV2 (#{sub_configs})" %}
+        {% raise "Property #{name} in #{@type} is not a supported type (#{base_type}). Config types allowed are #{SUPPORTED_TYPES}, or any includers of CrConfig (#{sub_configs})" %}
       {% end %}
     {% end %}
   end

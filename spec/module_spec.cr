@@ -3,14 +3,14 @@ require "./spec_helper"
 module MyModule
   module MyNestedModule
     class MyRealConfig
-      include CrCfgV2
+      include CrConfig
 
       option myString : String
       option server : MySubConfig
     end
 
     class MySubConfig
-      include CrCfgV2
+      include CrConfig
 
       option host : String, default: "localhost"
       option port : Int32?
@@ -20,7 +20,7 @@ end
 
 module SeparateModule
   class MyOtherConfig
-    include CrCfgV2
+    include CrConfig
 
     option real : MyModule::MyNestedModule::MyRealConfig
   end

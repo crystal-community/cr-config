@@ -1,7 +1,7 @@
 require "./builder_macro.cr"
 require "./config_macros.cr"
 
-module CrCfgV2
+module CrConfig
   include BuilderMacro
   include Macros
 
