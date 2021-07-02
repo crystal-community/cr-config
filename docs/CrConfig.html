@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Crystal Docs 0.36.1">
+<meta name="crystal_docs.project_version" content="1.0.0">
+<meta name="crystal_docs.project_name" content="Crystal Config">
+
+
+    <link rel="canonical" href="https://github.com/tsornson/cr-config/CrConfig.html">
+
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/doc.js"></script>
+
+  <meta name="repository-name" content="Crystal Config">
+  <title>CrConfig - Crystal Config 1.0.0</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="index.html">
+          Crystal Config
+        </a>
+      </h1>
+
+      <span class="project-version">
+        1.0.0
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class="parent open current" data-id="Crystal Config/CrConfig" data-name="crconfig">
+      <a href="CrConfig.html">CrConfig</a>
+      
+        <ul>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/AbstractBuilder" data-name="crconfig::abstractbuilder">
+      <a href="CrConfig/AbstractBuilder.html">AbstractBuilder</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/AllTypes" data-name="crconfig::alltypes">
+      <a href="CrConfig/AllTypes.html">AllTypes</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/BuilderMacro" data-name="crconfig::buildermacro">
+      <a href="CrConfig/BuilderMacro.html">BuilderMacro</a>
+      
+    </li>
+  
+  <li class="parent " data-id="Crystal Config/CrConfig/ConfigException" data-name="crconfig::configexception">
+      <a href="CrConfig/ConfigException.html">ConfigException</a>
+      
+        <ul>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/ConfigException/Type" data-name="crconfig::configexception::type">
+      <a href="CrConfig/ConfigException/Type.html">Type</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Macros" data-name="crconfig::macros">
+      <a href="CrConfig/Macros.html">Macros</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/PrimitiveTypes" data-name="crconfig::primitivetypes">
+      <a href="CrConfig/PrimitiveTypes.html">PrimitiveTypes</a>
+      
+    </li>
+  
+  <li class="parent " data-id="Crystal Config/CrConfig/Providers" data-name="crconfig::providers">
+      <a href="CrConfig/Providers.html">Providers</a>
+      
+        <ul>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/AbstractProvider" data-name="crconfig::providers::abstractprovider">
+      <a href="CrConfig/Providers/AbstractProvider.html">AbstractProvider</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/CommandLineParser" data-name="crconfig::providers::commandlineparser">
+      <a href="CrConfig/Providers/CommandLineParser.html">CommandLineParser</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/DotenvProvider" data-name="crconfig::providers::dotenvprovider">
+      <a href="CrConfig/Providers/DotenvProvider.html">DotenvProvider</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/EnvVarProvider" data-name="crconfig::providers::envvarprovider">
+      <a href="CrConfig/Providers/EnvVarProvider.html">EnvVarProvider</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/FolderConfigProvider" data-name="crconfig::providers::folderconfigprovider">
+      <a href="CrConfig/Providers/FolderConfigProvider.html">FolderConfigProvider</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/JsonProvider" data-name="crconfig::providers::jsonprovider">
+      <a href="CrConfig/Providers/JsonProvider.html">JsonProvider</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/ProcProvider" data-name="crconfig::providers::procprovider">
+      <a href="CrConfig/Providers/ProcProvider.html">ProcProvider</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/SimpleFileProvider" data-name="crconfig::providers::simplefileprovider">
+      <a href="CrConfig/Providers/SimpleFileProvider.html">SimpleFileProvider</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/YamlProvider" data-name="crconfig::providers::yamlprovider">
+      <a href="CrConfig/Providers/YamlProvider.html">YamlProvider</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">module</span> CrConfig
+
+</h1>
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="included-modules" class="anchor" href="#included-modules">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Included Modules
+  </h2>
+  <ul class="other-types-list">
+    
+      <li class="other-type"><a href="CrConfig/BuilderMacro.html">CrConfig::BuilderMacro</a></li>
+    
+      <li class="other-type"><a href="CrConfig/Macros.html">CrConfig::Macros</a></li>
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      cr-config/abstract_provider.cr
+    
+    <br/>
+  
+    
+      cr-config/builder_macro.cr
+    
+    <br/>
+  
+    
+      cr-config/config_base.cr
+    
+    <br/>
+  
+
+
+
+  
+    <h2>
+      <a id="constant-summary" class="anchor" href="#constant-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+      Constant Summary
+    </h2>
+  
+  <dl>
+    
+      <dt class="entry-const" id="SUPPORTED_TYPES">
+        <strong>SUPPORTED_TYPES</strong> = <code>{<span class="s">&quot;Array(Bool)&quot;</span>, <span class="s">&quot;Array(Float32)&quot;</span>, <span class="s">&quot;Array(Float64)&quot;</span>, <span class="s">&quot;Array(Int32)&quot;</span>, <span class="s">&quot;Array(Int64)&quot;</span>, <span class="s">&quot;Array(String)&quot;</span>, <span class="s">&quot;Array(UInt32)&quot;</span>, <span class="s">&quot;Array(UInt64)&quot;</span>, <span class="s">&quot;Bool&quot;</span>, <span class="s">&quot;Float32&quot;</span>, <span class="s">&quot;Float64&quot;</span>, <span class="s">&quot;Int32&quot;</span>, <span class="s">&quot;Int64&quot;</span>, <span class="s">&quot;String&quot;</span>, <span class="s">&quot;UInt32&quot;</span>, <span class="s">&quot;UInt64&quot;</span>}</code>
+      </dt>
+      
+    
+  </dl>
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="macro-summary" class="anchor" href="#macro-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Macro Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#option(name,default=nil)-macro" class="signature"><strong>option</strong>(name, default = <span class="n">nil</span>)</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="macro-detail" class="anchor" href="#macro-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Macro Detail
+  </h2>
+  
+    <div class="entry-detail" id="option(name,default=nil)-macro">
+      <div class="signature">
+        
+        macro <strong>option</strong>(name, default = <span class="n">nil</span>)
+
+        <a class="method-permalink" href="#option(name,default=nil)-macro">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+
+
+</div>
+
+</body>
+</html>

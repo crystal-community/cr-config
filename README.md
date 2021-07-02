@@ -1,110 +1,166 @@
-# cr-cfg
+# Crystal Config
+This library aims to provide robust configuration management for long running crystal processes
+where a CLI interface isn't enough. It aims to provide these configurations through a strongly
+typed class. Goals are:
 
-A simple Model based config generator and parser. You just define the config you want and
-if it doesn't exist, a sample one will be generated based on how you defined it. If it does
-exist, it will parse the config options it knows about into local variables of the correct
-type.
+- [X] Declarative construction of config files (through macro driven classes)
+- [X] Supports property loading hierarchy
+- [X] * Supports loading from file
+- [X] ** Supports JSON
+- [X] ** Supports YAML
+- [X] ** Supports dotenv files
+- [X] ** Load different config file based on environment
+- [X] * Supports loading from environment variables
+- [X] * Supports loading from command line argument overrides (does not conflict with option_parser)
+- [X] * hierarchy can be configured
+- [X] * can support custom config loaders
+- [X] Supports runtime config overrides
+- [X] Supports property validators
+- [ ] Supports enum values
+- [ ] Supports lists of subconfigs
+- [ ] Auto generated config files if missing
+- [ ] New configurations automatically get added to config file if missing
 
-## Installation
+# Examples
 
-Add this to your application's `shard.yml`:
-
-```yaml
-dependencies:
-  cr-cfg:
-    git: https://sornson.io/gogs/tsornson/cr-cfg
-```
-
-## Usage
-
-A full sample file
+## Defining a configuration class
 
 ```crystal
-require "cr-cfg"
+require "cr-config"
 
-class MyConfig
-  include CrCfg
+class ServerConfig
+  include CrConfig
 
-  # defaults to config.txt if not specified
-  file_name "my_config.txt"
+  option domain : String
+  option ports : Array(Int32)
+  option timeout : Float32
 
-  header "Something that can describe the config file
-    May take multiple lines"
-
-  # You may use this macro so passing in -h or --help to the program well exit when the help generated
-  # by this config gets printed. Useful to omit if there are multiple argument parsers at work
-  # exit_on_help
-
-  option myOption1 : String,
-    description: "While optional, it helps to have a description of your option",
-    default: "my option" # also optional
-
-  option myOption2 : Int32,
-    description: "Some options can be made required, which means they need to be defined in the config.
-    Adding a default to an option negates its requiredness.",
-    required: true
-
-  option myOption3 : Bool,
-    description "Bool options are, well, for booleans",
-    flag: "--boolean"
-
-  option myOption4 : String,
-    description: "Argument flag can now be supplied. Your param can be defined in a config but overwritten by an argument passed in",
-    shortflag: "-s",
-    longflag: "--option4"
-
-  option myOption5 : String,
-    description: "NEW! You can set properties as environment variables using the uppercase of the name"
-
-  option lastOption : Float64
-
-  footer "In the event you want a footer for your config."
+  option client : ClientConfig
+  option database : Database
 end
 
-c = MyConfig.new
-c.load # will attempt to read and parse my_config.txt. If it doesn't exist, it will generate a sample one and exit
+class ClientConfig
+  include CrConfig
 
-c.generate_config
-#### RETURNS IO::Memory WITH CONTENT: ####
-# Something that can describe the config file
-# May take multiple lines
+  option host : String
+  option port : Int32?
+  option auth_token : String
+end
 
-# While optional, it helps to have a description of your option
-myOption1 = my option
+class Database
+  include CrConfig
 
-# Some options can be made required, which means they need to be defined in the config
-myOption2 = VALUE
+  option hostname : String, default: "localhost"
+  option port : Int32
+  option schema : String, default: "http"
+  option username : String?
+  option password : String?
+end
 
-# Bool options are, well, for booleans
-myOption3 = VALUE
+# ...Configure providers, validators, interceptors here. See examples below...
 
-# NEW! Argument flag can now be supplied. Your param can be defined in a config but overwritten by an argument passed in
-myOption4 = VALUE
-lastOption = VALUE
+config = ServerConfig.instance # Will load and create a new instance of the config. Can be called repeatedly and it only loads the first time
 
-# In the event you want a footer for your config.
-#### END OUTPUT ####
-c.myOption1
-c.myOption2
-c.lastOption
+config.domain            # => All valid properties of the relevant type
+config.ports             # => All valid properties of the relevant type
+config.timeout           # => All valid properties of the relevant type
+config.database.hostname # => All valid properties of the relevant type
+config.database.port     # => All valid properties of the relevant type
+config.database.schema   # => All valid properties of the relevant type
+config.database.username # => All valid properties of the relevant type
+config.database.password # => All valid properties of the relevant type
+
 ```
 
-Running your program with the `-h` or `--help` cli arguments will print
+The `option` macro can work with `String`, `Int32`, `Int64`, `Float32`, `Float64`, `Bool`, `UInt32`, `UInt64`, `Array`'s of any
+of those, and any other configuration class (but NOT `Array`'s of other configuration classes, though it's on the wishlist).
+
+## Configuration Providers
+Configuration providers are, well, providers of configuration. During the creation and loading of a config class,
+configuration providers are iterated through to obtain the config values and store them into the config class.
+Crystal Config provides a list of some standard ones, but also provides a way for custom providers to be implemented.
+
+```crystal
+# Using above example classes
+
+# We use the static method to define a list of providers that we want to provide configuration for us.
+# The order of the list matters - this will be the order that the providers get run in, and define the
+# order of precedence on which value gets set if it's found from multiple providers.
+# Last config provider wins.
+ServerConfig.providers do
+  [
+    CrConfig::SimpleFileProvider("config.json"), # This will read a named config file, supporting json, yaml, and .env file formats
+    CrConfig::EnvVarProvider.new,                # Let environment variables set (and override) configuration values
+    CrConfig::CommandLineParser.new              # Let the command line start up of the server also provide a way to override config values (useful for devs)
+  ]
+end
+
+# Custom providers can be defined through a block, the builder that's passed in has a single method of `.set("<name>", val)`
+# and is shared across all providers. Calling `set` will return true if a config value was set, or false if the config name
+# doesn't exist.
+#
+# There are no limits to how many custom providers can be defined through the `provider` method, they will all be added
+# sequentially to the same list of config providers.
+ServerConfig.provider do |builder|
+  builder.set("database.hostname", "example.com")
+end
+
+# The below call will trigger the above providers to be iterated through to construct the instance of ServerConfig
+s = ServerConfig.instance
+s.database.hostname # => "example.com"
+
 ```
-Something that can describe the config file
-May take multiple lines
-    --boolean                     Bool options are, well, for booleans
-    -s S, --option4 OPTION4       NEW! Argument flag can now be supplied. Your param can be defined in a config but overwritten by an argument passed in
+
+## Configuration Validators
+Validators are custom validators that will be run on all configurations during building of the config class. Crystal
+Config already validates that values are not-nil (where appropriate) and of the type they need to be, but extra
+validation might be needed to ensure bad configuration values don't cause problems.
+
+```crystal
+# Using the above example classes
+
+# This example uses a single validator, but multiple can be defined through the `validator` method sequentially,
+# and they'll be called in the order they're defined.
+ServerConfig.validator do |name, val|
+  next if name == "schema"
+
+  if val != "https" && val != "http"
+    raise "Unsupported server schema #{val}, expected 'http' or 'https'"
+  end
+end
+
+ServerConfig.provider do |builder|
+  builder.set("schema", "nope")
+end
+
+ServerConfig.instance # => ConfigException(name: "schema", type: CustomValidatorError, message: "...")
+
 ```
-When using this project to parse arguments, it leaves the ARGV global variable
-intact so multiple arg parsers can be run with it.
 
-## Wish List
-- [ ] Fill out config for missing options in event model is updated
-- [ ] Support of lists
-- [X] support argument parsing
-- [X] support environment variables
+## Runtime Configuration Interceptors
+After a configuration class has been built and set, it can be desirable to temporarily override those values
+to something else (i.e. temporarily reroute requests to a different hostname).
 
-## Contributors
+```crystal
+# Using above example classes
 
-- Troy A. Sornson - creator, maintainer
+use_stable = false
+ServerConfig.runtime_interceptor do |name, real_val|
+  next unless name == "client.host"
+
+  next "stable.example.com" if use_stable
+end
+
+ServerConfig.provider do |builder|
+  builder.set("client.host", "example.com")
+end
+
+s = ServerConfig.instance
+
+s.client.host # => example.com
+
+use_stable = true
+s.client.host # => stable.example.com
+```
+
+Ironically, runtime interceptors can't be further configured at runtime, only at config build time.

@@ -1,8 +1,8 @@
-name: cr-cfg
-version: 1.0.5
+name: cr-config
+version: 1.0.0
 
 authors:
-  - Troy A. Sornson <troyasornson37@gmail.com>
+  - Troy Sornson <troy@sornson.io>
 
 crystal: 1.0.0
 
