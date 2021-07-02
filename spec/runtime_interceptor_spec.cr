@@ -60,4 +60,43 @@ describe "Runtime Interceptors" do
     r.sub.myInts.should eq [3, 1, 2, 3]
     count.should eq 5 # 2 props hit for first, 2 props for 2nd, 1 prop for the 3rd
   end
+
+  it "can use next without providing nil" do
+    RuntimeInterceptorConfig.provider do |bob|
+      bob.set("myString", "my super string")
+      bob.set("sub.myInts", 3)
+    end
+
+    RuntimeInterceptorConfig.runtime_interceptor do |name, val|
+      next unless name == "myString"
+
+      next "something else"
+    end
+
+    r = RuntimeInterceptorConfig.instance
+    r.myString.should eq "something else"
+    r.sub.myInts.should eq [3]
+  end
+
+  it "can be configured at runtime" do
+    RuntimeInterceptorConfig.provider do |bob|
+      bob.set("myString", "my super string")
+      bob.set("sub.myInts", 3)
+    end
+
+    return_somethinge_else = false
+    RuntimeInterceptorConfig.runtime_interceptor do |name, val|
+      next unless name == "myString"
+      next "something else" if return_somethinge_else
+    end
+
+    r = RuntimeInterceptorConfig.instance
+    r.myString.should eq "my super string"
+
+    return_somethinge_else = true
+    r.myString.should eq "something else"
+
+    return_somethinge_else = false
+    r.myString.should eq "my super string"
+  end
 end

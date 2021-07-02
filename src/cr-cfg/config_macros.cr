@@ -27,6 +27,17 @@ module CrCfgV2
        } %}
   end
 
+  macro _validate_properties
+    {% for name, props in CONFIG_PROPS %}
+      {% base_type = props[:base_type].id %}
+      {% possible_base_type = @type.id.includes?("::") ? "#{@type.id.split("::")[0..-2].join("::").id}::#{base_type}".id : base_type %}
+      {% sub_configs = CrCfgV2.includers.map { |x| x.id } %}
+      {% unless SUPPORTED_TYPES.includes?("#{base_type}") || sub_configs.includes?(base_type) || sub_configs.includes?(possible_base_type) %}
+        {% raise "Property #{name} in #{@type} is not a supported type (#{base_type}). Config types allowed are #{SUPPORTED_TYPES}, or any includers of CrCfgV2 (#{sub_configs})" %}
+      {% end %}
+    {% end %}
+  end
+
   macro _generate_getters
     {% for name, val in CONFIG_PROPS %}
       {% if val[:is_base_type] %}
@@ -96,6 +107,8 @@ module CrCfgV2
     CONFIG_PROPS = {} of Nil => Nil
 
     macro finished
+      _validate_properties
+
       _generate_getters
 
       _generate_constructor
@@ -105,7 +118,7 @@ module CrCfgV2
       _generate_config_providers
 
       def self.load
-        bob = {{@type}}Builder.new("")
+        bob = {{@type.id.split("::")[-1].id}}ConfigBuilder.new("")
 
         @@_providers.each do |provider|
           provider.populate(bob)

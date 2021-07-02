@@ -3,13 +3,23 @@ module CrCfgV2::ConfigProvider
     @@_runtime_interceptors = [] of Proc(String, AllTypes?, AllTypes?)
     @@_providers = [] of AbstractProvider
     @@_validators = [] of Proc(String, AllTypes?, Nil)
+    @@_instance : {{@type}}?
     class_getter _validators
     class_property _runtime_interceptors
+
+    def self.instance : {{@type}}
+      if i = @@_instance
+        return i
+      end
+      @@_instance = self.load
+      @@_instance.not_nil!
+    end
 
     def self.reset
       @@_runtime_interceptors.clear
       @@_providers.clear
       @@_validators.clear
+      @@_instance = nil
     end
 
     def self.validator(&block : (String, AllTypes?) -> Nil)

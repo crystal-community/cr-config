@@ -116,6 +116,15 @@ class DumbConfigProvider < CrCfgV2::AbstractProvider
 end
 
 describe "CrCfg V2" do
+  it "raises errors for unset properties" do
+    begin
+      Test.load
+    rescue e : CrCfgV2::ConfigException
+      e.name.should eq "prop2"
+      e.type.should eq CrCfgV2::ConfigException::Type::ConfigNotFound
+    end
+  end
+
   it "gets setup by the dumb provider" do
     Test.providers.clear
     Test.provider(DumbConfigProvider.new)

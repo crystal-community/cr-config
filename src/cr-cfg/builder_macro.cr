@@ -19,7 +19,8 @@ module CrCfgV2::BuilderMacro
 
   macro _generate_builder
 
-    class {{@type.id}}Builder < AbstractBuilder
+
+    class {{@type.id.split("::")[-1].id}}ConfigBuilder < AbstractBuilder
       {% verbatim do %}
       macro _get_default_for_type(default, type)
         {% if default != nil %}
@@ -96,7 +97,7 @@ module CrCfgV2::BuilderMacro
       {% if props[:is_base_type] %}
       property {{name}} : {{props[:type]}}{% unless props[:nilable] %}?{% end %}
       {% else %}
-      property {{name}} : {{props[:base_type]}}::{{props[:base_type]}}Builder
+      property {{name}} : {{props[:base_type]}}::{{props[:base_type].id.split("::")[-1].id}}ConfigBuilder
       {% end %}
       {% end %}
 
@@ -107,7 +108,7 @@ module CrCfgV2::BuilderMacro
         {% if props[:is_base_type] %}
         @{{name}} = _get_default_for_type({{props[:default]}}, {{props[:base_type]}})
         {% else %}
-        @{{name}} = {{props[:base_type]}}::{{props[:base_type]}}Builder.new("#{@_base_name}{{name}}.")
+        @{{name}} = {{props[:base_type]}}::{{props[:base_type].id.split("::")[-1].id}}ConfigBuilder.new("#{@_base_name}{{name}}.")
         {% end %}
         {% end %}
       end
@@ -122,7 +123,7 @@ module CrCfgV2::BuilderMacro
           {% for name, props in CONFIG_PROPS %}
           {% if props[:is_base_type] %}
           when "{{name.downcase}}"
-            @{{name}} = {{@type}}Builder.coerce(val, {{props[:base_type]}}, "{{name}}").as({{props[:base_type]}})
+            @{{name}} = {{@type.id.split("::")[-1].id}}ConfigBuilder.coerce(val, {{props[:base_type]}}, "{{name}}").as({{props[:base_type]}})
             return true
           {% else %}
           when "{{name.downcase}}"
@@ -143,7 +144,7 @@ module CrCfgV2::BuilderMacro
         {% for name, props in CONFIG_PROPS %}
         {% unless props[:nilable] %}
         if @{{name}}.nil? && !({{props[:nilable]}})
-          raise ConfigException.new "{{name}}", ConfigException::Type::ConfigNotFound, "Not found in any config source"
+          raise ConfigException.new "#{@_base_name}{{name}}", ConfigException::Type::ConfigNotFound, "Not found in any config source"
         end
         {% end %}
         {% end %}
