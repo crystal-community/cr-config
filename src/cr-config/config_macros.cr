@@ -1,4 +1,8 @@
+# This module houses the macros for the config class itself, including the static methods used for configuring
+# the parsing, validating, and retreiving of config values.
 module CrConfig::Macros
+  # Generates class variable to store the providers, validators, interceptors, and the already parsed instance of
+  # the config class, if already parsed.
   macro _generate_config_providers
     @@_runtime_interceptors = [] of Proc(String, AllTypes?, AllTypes?)
     @@_providers = [] of Providers::AbstractProvider
@@ -54,6 +58,7 @@ module CrConfig::Macros
     end
   end
 
+  # Macro for validating all `option` properties are of valid types, being either something in `AllTypes`, or another configuration class
   macro _validate_properties
     {% for name, props in CONFIG_PROPS %}
       {% base_type = props[:base_type].id %}
@@ -65,6 +70,8 @@ module CrConfig::Macros
     {% end %}
   end
 
+  # Generates getter methods for the config class. The `[]` and `[]?` methods are also generated, using the config name dot notation
+  # to retreive the value.
   macro _generate_getters
     {% for name, val in CONFIG_PROPS %}
       {% if val[:is_base_type] %}
@@ -116,6 +123,7 @@ module CrConfig::Macros
     end
   end
 
+  # Generates the comprehensive and exhaustive `initialize` method for this configuration class. All properties are included
   macro _generate_constructor
     def initialize(base_name : String, {% for name, prop in CONFIG_PROPS %}
       @{{name}} : {{prop[:type]}},

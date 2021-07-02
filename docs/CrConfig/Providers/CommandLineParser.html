@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Crystal Docs 0.36.1">
+<meta name="crystal_docs.project_version" content="1.0.0">
+<meta name="crystal_docs.project_name" content="Crystal Config">
+
+
+    <link rel="canonical" href="https://github.com/tsornson/cr-config/CrConfig/Providers/CommandLineParser.html">
+
+<link href="../../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../js/doc.js"></script>
+
+  <meta name="repository-name" content="Crystal Config">
+  <title>CrConfig::Providers::CommandLineParser - Crystal Config 1.0.0</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "../../";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="../../index.html">
+          Crystal Config
+        </a>
+      </h1>
+
+      <span class="project-version">
+        1.0.0
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class="parent open current" data-id="Crystal Config/CrConfig" data-name="crconfig">
+      <a href="../../CrConfig.html">CrConfig</a>
+      
+        <ul>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/AbstractBuilder" data-name="crconfig::abstractbuilder">
+      <a href="../../CrConfig/AbstractBuilder.html">AbstractBuilder</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/AllTypes" data-name="crconfig::alltypes">
+      <a href="../../CrConfig/AllTypes.html">AllTypes</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/BuilderMacro" data-name="crconfig::buildermacro">
+      <a href="../../CrConfig/BuilderMacro.html">BuilderMacro</a>
+      
+    </li>
+  
+  <li class="parent " data-id="Crystal Config/CrConfig/ConfigException" data-name="crconfig::configexception">
+      <a href="../../CrConfig/ConfigException.html">ConfigException</a>
+      
+        <ul>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/ConfigException/Type" data-name="crconfig::configexception::type">
+      <a href="../../CrConfig/ConfigException/Type.html">Type</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Macros" data-name="crconfig::macros">
+      <a href="../../CrConfig/Macros.html">Macros</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/PrimitiveTypes" data-name="crconfig::primitivetypes">
+      <a href="../../CrConfig/PrimitiveTypes.html">PrimitiveTypes</a>
+      
+    </li>
+  
+  <li class="parent open current" data-id="Crystal Config/CrConfig/Providers" data-name="crconfig::providers">
+      <a href="../../CrConfig/Providers.html">Providers</a>
+      
+        <ul>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/AbstractProvider" data-name="crconfig::providers::abstractprovider">
+      <a href="../../CrConfig/Providers/AbstractProvider.html">AbstractProvider</a>
+      
+    </li>
+  
+  <li class=" current" data-id="Crystal Config/CrConfig/Providers/CommandLineParser" data-name="crconfig::providers::commandlineparser">
+      <a href="../../CrConfig/Providers/CommandLineParser.html">CommandLineParser</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/DotenvProvider" data-name="crconfig::providers::dotenvprovider">
+      <a href="../../CrConfig/Providers/DotenvProvider.html">DotenvProvider</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/EnvVarProvider" data-name="crconfig::providers::envvarprovider">
+      <a href="../../CrConfig/Providers/EnvVarProvider.html">EnvVarProvider</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/FolderConfigProvider" data-name="crconfig::providers::folderconfigprovider">
+      <a href="../../CrConfig/Providers/FolderConfigProvider.html">FolderConfigProvider</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/JsonProvider" data-name="crconfig::providers::jsonprovider">
+      <a href="../../CrConfig/Providers/JsonProvider.html">JsonProvider</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/ProcProvider" data-name="crconfig::providers::procprovider">
+      <a href="../../CrConfig/Providers/ProcProvider.html">ProcProvider</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/SimpleFileProvider" data-name="crconfig::providers::simplefileprovider">
+      <a href="../../CrConfig/Providers/SimpleFileProvider.html">SimpleFileProvider</a>
+      
+    </li>
+  
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/YamlProvider" data-name="crconfig::providers::yamlprovider">
+      <a href="../../CrConfig/Providers/YamlProvider.html">YamlProvider</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">class</span> CrConfig::Providers::CommandLineParser
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../CrConfig/Providers/CommandLineParser.html">CrConfig::Providers::CommandLineParser</a></li><li class="superclass"><a href="../../CrConfig/Providers/AbstractProvider.html">CrConfig::Providers::AbstractProvider</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+
+
+
+
+  <h2>
+    <a id="overview" class="anchor" href="#overview">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Overview
+  </h2>
+
+  <p>Provider that looks through provided command line arguments for configuration overrides</p>
+
+<p>This provider assumes all configurations will be supplied in the format of <code>--config.name=new_val</code> . To make this approach workable with OptionParser,
+any configurations discovered through command line arguments will be removed from the ARGV array, so that OptionParser won't error for unrecognized options.
+This requires the configuration class to be constructed <em>before</em> the <code>OptionParser.parse</code> method gets called.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      cr-config/abstract_provider.cr
+    
+    <br/>
+  
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#populate(bob:AbstractBuilder)-instance-method" class="signature"><strong>#populate</strong>(bob : AbstractBuilder)</a>
+        
+          <div class="summary"><p>This method gets called with the instance of the configuration builder during config building.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+    
+
+  <h3>Instance methods inherited from class <code><a href="../../CrConfig/Providers/AbstractProvider.html">CrConfig::Providers::AbstractProvider</a></code></h3>
+  
+  
+    <a href="../../CrConfig/Providers/AbstractProvider.html#populate(bob:AbstractBuilder)-instance-method" class="tooltip">
+      <span>populate(bob : AbstractBuilder)</span>
+    populate</a>
+    
+  
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="populate(bob:AbstractBuilder)-instance-method">
+      <div class="signature">
+        
+        def <strong>populate</strong>(bob : <a href="../../CrConfig/AbstractBuilder.html">AbstractBuilder</a>)
+
+        <a class="method-permalink" href="#populate(bob:AbstractBuilder)-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+            <div class="doc-inherited">
+              Description copied from class <a href="../../CrConfig/Providers/AbstractProvider.html">CrConfig::Providers::AbstractProvider</a>
+            </div>
+          
+          <p>This method gets called with the instance of the configuration builder during config building.</p>
+
+<p>Use this method to populate the builder with any configuration name / values that this provider... provides</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>

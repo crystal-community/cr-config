@@ -5,9 +5,12 @@ module CrConfig
   include BuilderMacro
   include Macros
 
+  # Base types supported by configuration classes. These and `Array(*)` of these make up the `AllTypes` alias.
   alias PrimitiveTypes = String | Int32 | Int64 | Float32 | Float64 | Bool | UInt32 | UInt64
 
   {% begin %}
+  # Represents all base types supported by configuration properties. All configurations must resolve
+  # to one of these types eventually
   alias AllTypes = PrimitiveTypes {% for t in PrimitiveTypes.union_types %}| Array({{t}}) {% end %}
   {% end %}
   {% begin %}
