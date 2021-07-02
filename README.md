@@ -36,6 +36,8 @@ class ServerConfig
   option domain : String
   option ports : Array(Int32)
   option timeout : Float32
+  option use_http : Bool
+
 
   option client : ClientConfig
   option database : Database
@@ -63,14 +65,16 @@ end
 
 config = ServerConfig.instance # Will load and create a new instance of the config. Can be called repeatedly and it only loads the first time
 
-config.domain            # => All valid properties of the relevant type
-config.ports             # => All valid properties of the relevant type
-config.timeout           # => All valid properties of the relevant type
-config.database.hostname # => All valid properties of the relevant type
-config.database.port     # => All valid properties of the relevant type
-config.database.schema   # => All valid properties of the relevant type
-config.database.username # => All valid properties of the relevant type
-config.database.password # => All valid properties of the relevant type
+# These are all valid calls, and will return the relevant type
+config.domain
+config.ports
+config.timeout
+config.use_http?         # Note the '?' due to it being a bool property
+config.database.hostname
+config.database.port
+config.database.schema
+config.database.username
+config.database.password
 
 ```
 

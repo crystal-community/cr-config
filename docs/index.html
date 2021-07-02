@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="generator" content="Crystal Docs 0.36.1">
-<meta name="crystal_docs.project_version" content="2.0.0">
+<meta name="crystal_docs.project_version" content="2.1.0">
 <meta name="crystal_docs.project_name" content="Crystal Config">
 
 
@@ -14,7 +14,7 @@
 <script type="text/javascript" src="js/doc.js"></script>
 
   <meta name="repository-name" content="Crystal Config">
-  <title>Crystal Config 2.0.0</title>
+  <title>Crystal Config 2.1.0</title>
   <script type="text/javascript">
   CrystalDocs.base_path = "";
   </script>
@@ -40,7 +40,7 @@
       </h1>
 
       <span class="project-version">
-        2.0.0
+        2.1.0
       </span>
     </div>
   </div>
@@ -198,6 +198,8 @@ typed class. Goals are:</p>
   option domain : <span class="t">String</span>
   option ports : <span class="t">Array</span>(<span class="t">Int32</span>)
   option timeout : <span class="t">Float32</span>
+  option use_http : <span class="t">Bool</span>
+
 
   option client : <span class="t">ClientConfig</span>
   option database : <span class="t">Database</span>
@@ -225,14 +227,16 @@ typed class. Goals are:</p>
 
 config <span class="o">=</span> <span class="t">ServerConfig</span>.instance <span class="c"># Will load and create a new instance of the config. Can be called repeatedly and it only loads the first time</span>
 
-config.domain            <span class="c"># =&gt; All valid properties of the relevant type</span>
-config.ports             <span class="c"># =&gt; All valid properties of the relevant type</span>
-config.timeout           <span class="c"># =&gt; All valid properties of the relevant type</span>
-config.database.hostname <span class="c"># =&gt; All valid properties of the relevant type</span>
-config.database.port     <span class="c"># =&gt; All valid properties of the relevant type</span>
-config.database.schema   <span class="c"># =&gt; All valid properties of the relevant type</span>
-config.database.username <span class="c"># =&gt; All valid properties of the relevant type</span>
-config.database.password <span class="c"># =&gt; All valid properties of the relevant type</span>
+<span class="c"># These are all valid calls, and will return the relevant type</span>
+config.domain
+config.ports
+config.timeout
+config.use_http?         <span class="c"># Note the &#39;?&#39; due to it being a bool property</span>
+config.database.hostname
+config.database.port
+config.database.schema
+config.database.username
+config.database.password
 </code></pre>
 
 <p>The <code>option</code> macro can work with <code>String</code>, <code>Int32</code>, <code>Int64</code>, <code>Float32</code>, <code>Float64</code>, <code>Bool</code>, <code>UInt32</code>, <code>UInt64</code>, <code>Array</code>'s of any

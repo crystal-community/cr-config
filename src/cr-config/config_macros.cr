@@ -77,7 +77,7 @@ module CrConfig::Macros
       {% if val[:is_base_type] %}
       @{{name}} : {{val[:type]}}
 
-      def {{name}} : {{val[:type]}}
+      def {{name}}{% if val[:base_type].id == Bool.id %}?{% end %} : {{val[:type]}}
         full_name = @_names["{{name}}"]
         @@_runtime_interceptors.each do |proc|
           if p = proc.call(full_name, @{{name}})
@@ -103,7 +103,7 @@ module CrConfig::Macros
       when "{{name}}"
         # If we're here, and there's a '.' in the initial key, we're treating a primitive as a subconfiguration
         return nil if key.includes?('.')
-        return {{name}}
+        return {{name}}{% if props[:base_type].id == Bool.id %}?{% end %}
       {% else %}
       when "{{name}}"
         return @{{name}}[rest]
