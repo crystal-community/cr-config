@@ -26,7 +26,7 @@ module SeparateModule
   end
 end
 
-describe "Crystal Config Version 2" do
+describe "Crystal Config Modules" do
   Spec.before_each do
     SeparateModule::MyOtherConfig.reset
     MyModule::MyNestedModule::MyRealConfig.reset
@@ -72,5 +72,25 @@ describe "Crystal Config Version 2" do
 
     s1 = SeparateModule::MyOtherConfig.instance
     s.object_id.should eq s1.object_id
+  end
+
+  it "exposes the full list of configuration names available" do
+    SeparateModule::MyOtherConfig.provider do |bob|
+      bob.set("real.server.host", "yup")
+      bob.set("real.mystring", "nope") # case insensitive setting
+      bob.set("real.server.port", 8080)
+    end
+
+    s = SeparateModule::MyOtherConfig.instance
+    names = SeparateModule::MyOtherConfig.get_config_names
+
+    names.should contain "real.server.host"
+    names.should contain "real.myString"
+    names.should contain "real.server.port"
+    names.size.should eq 3
+
+    s["real.server.host"].should eq "yup"
+    s["real.server.port"].should eq 8080
+    s["real.myString"].should eq "nope"
   end
 end

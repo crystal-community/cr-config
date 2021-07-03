@@ -7,6 +7,7 @@ module CrConfig::Macros
     @@_runtime_interceptors = [] of Proc(String, AllTypes?, AllTypes?)
     @@_providers = [] of Providers::AbstractProvider
     @@_validators = [] of Proc(String, AllTypes?, Nil)
+    @@_config_names = Set(String).new
     @@_instance : {{@type}}?
     class_getter _validators
     class_property _runtime_interceptors
@@ -56,6 +57,10 @@ module CrConfig::Macros
     def self.providers
       @@_providers
     end
+
+    def self.get_config_names
+      @@_config_names
+    end
   end
 
   # Macro for validating all `option` properties are of valid types, being either something in `AllTypes`, or another configuration class
@@ -97,15 +102,15 @@ module CrConfig::Macros
       true_key, rest = key.split('.', 2) if key.includes?('.')
 
       {% begin %}
-      case true_key
+      case true_key.downcase
       {% for name, props in CONFIG_PROPS %}
       {% if props[:is_base_type] %}
-      when "{{name}}"
+      when "{{name.downcase}}"
         # If we're here, and there's a '.' in the initial key, we're treating a primitive as a subconfiguration
         return nil if key.includes?('.')
         return {{name}}{% if props[:base_type].id == Bool.id %}?{% end %}
       {% else %}
-      when "{{name}}"
+      when "{{name.downcase}}"
         return @{{name}}[rest]
       {% end %}
       {% end %}
@@ -113,6 +118,7 @@ module CrConfig::Macros
         return nil
       end
       {% end %}
+
     end
 
     def [](key : String)
@@ -133,6 +139,11 @@ module CrConfig::Macros
       {% for name, prop in CONFIG_PROPS %}
       {% if prop[:is_base_type] %}
       @_names["{{name}}"] = "#{base_name}{{name}}"
+      @@_config_names << "{{name}}"
+      {% else %}
+      {{prop[:base_type]}}.get_config_names.each do |name|
+        @@_config_names << "{{name}}.#{name}"
+      end
       {% end %}
       {% end %}
     end

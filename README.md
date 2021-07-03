@@ -33,12 +33,13 @@ require "cr-config"
 class ServerConfig
   include CrConfig
 
+  # Some properties can be "base" properties (think primitive types, and Arrays of them)
   option domain : String
   option ports : Array(Int32)
   option timeout : Float32
   option use_http : Bool
 
-
+  # Some properties can be other configuration classes
   option client : ClientConfig
   option database : Database
 end
@@ -76,6 +77,9 @@ config.database.schema
 config.database.username
 config.database.password
 
+# After an instance of the configuration class has been created, you can also use the `.get_config_names` static method
+# on the config class to get a set of all config names
+ServerConfig.get_config_names # => Set{"domain", "ports", ... , "database.hostname", "database.schema", ...}
 ```
 
 The `option` macro can work with `String`, `Int32`, `Int64`, `Float32`, `Float64`, `Bool`, `UInt32`, `UInt64`, `Array`'s of any

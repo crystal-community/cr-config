@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="generator" content="Crystal Docs 0.36.1">
-<meta name="crystal_docs.project_version" content="2.1.0">
+<meta name="crystal_docs.project_version" content="2.1.1">
 <meta name="crystal_docs.project_name" content="Crystal Config">
 
 
@@ -14,7 +14,7 @@
 <script type="text/javascript" src="js/doc.js"></script>
 
   <meta name="repository-name" content="Crystal Config">
-  <title>Crystal Config 2.1.0</title>
+  <title>Crystal Config 2.1.1</title>
   <script type="text/javascript">
   CrystalDocs.base_path = "";
   </script>
@@ -40,7 +40,7 @@
       </h1>
 
       <span class="project-version">
-        2.1.0
+        2.1.1
       </span>
     </div>
   </div>
@@ -195,12 +195,13 @@ typed class. Goals are:</p>
 <span class="k">class</span> <span class="t">ServerConfig</span>
   <span class="k">include</span> <span class="t">CrConfig</span>
 
+  <span class="c"># Some properties can be &quot;base&quot; properties (think primitive types, and Arrays of them)</span>
   option domain : <span class="t">String</span>
   option ports : <span class="t">Array</span>(<span class="t">Int32</span>)
   option timeout : <span class="t">Float32</span>
   option use_http : <span class="t">Bool</span>
 
-
+  <span class="c"># Some properties can be other configuration classes</span>
   option client : <span class="t">ClientConfig</span>
   option database : <span class="t">Database</span>
 <span class="k">end</span>
@@ -237,7 +238,10 @@ config.database.port
 config.database.schema
 config.database.username
 config.database.password
-</code></pre>
+
+<span class="c"># After an instance of the configuration class has been created, you can also use the `.get_config_names` static method</span>
+<span class="c"># on the config class to get a set of all config names</span>
+<span class="t">ServerConfig</span>.get_config_names <span class="c"># =&gt; Set{&quot;domain&quot;, &quot;ports&quot;, ... , &quot;database.hostname&quot;, &quot;database.schema&quot;, ...}</span></code></pre>
 
 <p>The <code>option</code> macro can work with <code>String</code>, <code>Int32</code>, <code>Int64</code>, <code>Float32</code>, <code>Float64</code>, <code>Bool</code>, <code>UInt32</code>, <code>UInt64</code>, <code>Array</code>'s of any
 of those, and any other configuration class (but NOT <code>Array</code>'s of other configuration classes, though it's on the wishlist).</p>
