@@ -49,6 +49,7 @@ class ClientConfig
 
   option host : String
   option port : Int32?
+
   option auth_token : String
 end
 

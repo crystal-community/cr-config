@@ -142,21 +142,26 @@ module CrConfig
           end
 
           {% begin %}
-          case name.downcase
-            {% for name, props in CONFIG_PROPS %}
-            {% if props[:is_base_type] %}
-            when "{{name.downcase}}"
-              @{{name}} = {{@type.id.split("::")[-1].id}}ConfigBuilder.coerce(val, {{props[:base_type]}}, "{{name}}").as({{props[:base_type]}})
-              return true
-            {% else %}
-            when "{{name.downcase}}"
-              # Check if we were able to parse a subpath from the given path
-              if r = rest
-                return @{{name}}.set(rest, val)
-              end
-            {% end %}
-            {% end %}
-            # purposely ignore trying to set non-existent values. Could be a dirty config, but not a reason to crash the server
+          2.times do
+            case name.downcase
+              {% for name, props in CONFIG_PROPS %}
+              {% if props[:is_base_type] %}
+              when "{{name.downcase}}"
+                @{{name}} = {{@type.id.split("::")[-1].id}}ConfigBuilder.coerce(val, {{props[:base_type]}}, "{{name}}").as({{props[:base_type]}})
+                return true
+              {% else %}
+              when "{{name.downcase}}"
+                # Check if we were able to parse a subpath from the given path
+                if r = rest
+                  return @{{name}}.set(rest, val)
+                end
+              {% end %}
+              {% end %}
+              # purposely ignore trying to set non-existent values. Could be a dirty config, but not a reason to crash the server
+            end
+            # Either the property doesn't exist, or it has underscores that had been converted to '.'s
+            name = "#{name}.#{rest}".gsub('.', '_')
+            rest = nil
           end
           {% end %}
           return false

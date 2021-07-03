@@ -13,6 +13,7 @@ class SubEnvVarConfig
   option someString : String?
   option someFloat : Float64
   option someFloatyString : String
+  option some_underscored_name : String?
 end
 
 describe "Environment Variable Provider" do
@@ -53,5 +54,23 @@ describe "Environment Variable Provider" do
     e.mySubConfig.someFloat.should eq 3.1415926
     e.mySubConfig.someFloatyString.should eq "3.1415926"
     e.mySubConfig.someString.should be_nil
+  end
+
+  it "correctly handles underscores in property names" do
+    EnvVarProviderSpec.providers do
+      [
+        CrConfig::Providers::EnvVarProvider.new,
+      ]
+    end
+
+    ENV["MYUINT"] = "999999999999"
+    ENV["MYSUBCONFIG_SOMEFLOAT"] = "3.1415926"
+    ENV["MYSUBCONFIG_SOMEFLOATYSTRING"] = "3.1415926"
+
+    ENV["MYSUBCONFIG_SOME_UNDERSCORED_NAME"] = "test"
+
+    e = EnvVarProviderSpec.instance
+
+    e.mySubConfig.some_underscored_name.should eq "test"
   end
 end
