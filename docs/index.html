@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="generator" content="Crystal Docs 0.36.1">
-<meta name="crystal_docs.project_version" content="2.1.2">
+<meta name="crystal_docs.project_version" content="2.1.3">
 <meta name="crystal_docs.project_name" content="Crystal Config">
 
 
@@ -14,7 +14,7 @@
 <script type="text/javascript" src="js/doc.js"></script>
 
   <meta name="repository-name" content="Crystal Config">
-  <title>Crystal Config 2.1.2</title>
+  <title>Crystal Config 2.1.3</title>
   <script type="text/javascript">
   CrystalDocs.base_path = "";
   </script>
@@ -40,7 +40,7 @@
       </h1>
 
       <span class="project-version">
-        2.1.2
+        2.1.3
       </span>
     </div>
   </div>
@@ -322,13 +322,22 @@ validation might be needed to ensure bad configuration values don't cause proble
 </a>Runtime Configuration Interceptors</h2>
 
 <p>After a configuration class has been built and set, it can be desirable to temporarily override those values
-to something else (i.e. temporarily reroute requests to a different hostname).</p>
+to something else (i.e. temporarily reroute requests to a different hostname). Runtime interceptors will only
+be invoked once per configuration property access, so if an interceptor also uses the config class in its
+logic and accesses other config properties, the second time a property is accessed will return what the providers
+defined it to be at config build time. This is to protect against infinite loops.</p>
 
 <pre><code class="language-crystal"><span class="c"># Using above example classes</span>
 
 use_stable <span class="o">=</span> <span class="n">false</span>
 <span class="t">ServerConfig</span>.runtime_interceptor <span class="k">do</span> <span class="o">|</span>name, real_val<span class="o">|</span>
   <span class="k">next</span> <span class="k">unless</span> name <span class="o">==</span> <span class="s">&quot;client.host&quot;</span>
+
+  <span class="c"># Runtime interceptors are called after the `instance` config gets created, so this access is safe.</span>
+  <span class="c"># Trying to pre-load the `instance` before it gets created or fully configured may lead to problems.</span>
+  <span class="c"># This specific call will not invoke this runtime handler again, as the &quot;client.host&quot; will have already</span>
+  <span class="c"># recorded it&#39;s running runtime interceptors and not re-invoke them a second time.</span>
+  <span class="t">ServerConfig</span>.instance.client.host
 
   <span class="k">next</span> <span class="s">&quot;stable.example.com&quot;</span> <span class="k">if</span> use_stable
 <span class="k">end</span>

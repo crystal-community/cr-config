@@ -150,7 +150,10 @@ ServerConfig.instance # => ConfigException(name: "schema", type: CustomValidator
 
 ## Runtime Configuration Interceptors
 After a configuration class has been built and set, it can be desirable to temporarily override those values
-to something else (i.e. temporarily reroute requests to a different hostname).
+to something else (i.e. temporarily reroute requests to a different hostname). Runtime interceptors will only
+be invoked once per configuration property access, so if an interceptor also uses the config class in its
+logic and accesses other config properties, the second time a property is accessed will return what the providers
+defined it to be at config build time. This is to protect against infinite loops.
 
 ```crystal
 # Using above example classes
@@ -158,6 +161,12 @@ to something else (i.e. temporarily reroute requests to a different hostname).
 use_stable = false
 ServerConfig.runtime_interceptor do |name, real_val|
   next unless name == "client.host"
+
+  # Runtime interceptors are called after the `instance` config gets created, so this access is safe.
+  # Trying to pre-load the `instance` before it gets created or fully configured may lead to problems.
+  # This specific call will not invoke this runtime handler again, as the "client.host" will have already
+  # recorded it's running runtime interceptors and not re-invoke them a second time.
+  ServerConfig.instance.client.host
 
   next "stable.example.com" if use_stable
 end

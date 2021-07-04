@@ -82,12 +82,22 @@ module CrConfig::Macros
       {% if val[:is_base_type] %}
       @{{name}} : {{val[:type]}}
 
+      @_processing_interceptor = Set(String).new
       def {{name}}{% if val[:base_type].id == Bool.id %}?{% end %} : {{val[:type]}}
         full_name = @_names["{{name}}"]
-        @@_runtime_interceptors.each do |proc|
-          if p = proc.call(full_name, @{{name}})
-            return p.as({{val[:base_type]}})
+        return @{{name}} if @_processing_interceptor.includes?("{{name}}")
+        begin
+          # We'll allow interceptors to be run once per config.
+          # If an interceptor also consults the config instance for certain properties, it will trigger
+          # an infinite loop of looking up a config will invoke interceptors that lookup configs that...
+          @_processing_interceptor << "{{name}}"
+          @@_runtime_interceptors.each do |proc|
+            if p = proc.call(full_name, @{{name}})
+              return p.as({{val[:base_type]}})
+            end
           end
+        ensure
+          @_processing_interceptor.delete("{{name}}")
         end
         @{{name}}
       end

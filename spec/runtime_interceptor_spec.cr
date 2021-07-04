@@ -84,19 +84,74 @@ describe "Runtime Interceptors" do
       bob.set("sub.myInts", 3)
     end
 
-    return_somethinge_else = false
+    return_something_else = false
     RuntimeInterceptorConfig.runtime_interceptor do |name, val|
       next unless name == "myString"
-      next "something else" if return_somethinge_else
+      "test" # placed here to make sure that it's not returned when return_something_else is false
+      next "something else" if return_something_else
     end
 
     r = RuntimeInterceptorConfig.instance
     r.myString.should eq "my super string"
 
-    return_somethinge_else = true
+    return_something_else = true
     r.myString.should eq "something else"
 
-    return_somethinge_else = false
+    return_something_else = false
     r.myString.should eq "my super string"
+  end
+
+  it "doesn't go through infinite loops" do
+    RuntimeInterceptorConfig.provider do |bob|
+      bob.set("myString", "my super string")
+      bob.set("sub.myInts", 3)
+    end
+
+    count = 0
+    RuntimeInterceptorConfig.runtime_interceptor do |name, val|
+      if name == "myString"
+        c = RuntimeInterceptorConfig.instance
+        count += 1
+        next c.myString # will trigger another lookup and interception of this variable
+      end
+    end
+
+    r = RuntimeInterceptorConfig.instance
+
+    count.should eq 0
+    r.myString.should eq "my super string"
+    count.should eq 1
+  end
+
+  it "allows interceptors to be triggered once per property" do
+    RuntimeInterceptorConfig.provider do |bob|
+      bob.set("myString", "my super string")
+      bob.set("sub.myInts", 3)
+    end
+
+    count = 0
+    RuntimeInterceptorConfig.runtime_interceptor do |name, val|
+      if name == "sub.myInts"
+        c = RuntimeInterceptorConfig.instance
+        count += 1
+        c.myString # will trigger another lookup and interception of this variable
+        next c.sub.myInts
+      end
+    end
+
+    RuntimeInterceptorConfig.runtime_interceptor do |name, val|
+      if name == "myString"
+        c = RuntimeInterceptorConfig.instance
+        count += 1
+        c.sub.myInts
+        next c.myString
+      end
+    end
+
+    r = RuntimeInterceptorConfig.instance
+
+    count.should eq 0
+    r.sub.myInts.should eq [3]
+    count.should eq 2 # 1 for the myString interceptor, 1 for the myInts interceptor
   end
 end
