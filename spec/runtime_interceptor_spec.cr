@@ -3,6 +3,7 @@ require "./spec_helper"
 class RuntimeInterceptorConfig
   include CrConfig
 
+  option myBool : Bool, default: true
   option myString : String
   option sub : RuntimeInterceptorSubConfig
 end
@@ -31,6 +32,7 @@ describe "Runtime Interceptors" do
     r = RuntimeInterceptorConfig.load
     r.myString.should eq "something else"
     r.sub.myInts.should eq [3]
+    r.myBool?.should be_true
   end
 
   it "don't continue past returned one" do
@@ -153,5 +155,19 @@ describe "Runtime Interceptors" do
     count.should eq 0
     r.sub.myInts.should eq [3]
     count.should eq 2 # 1 for the myString interceptor, 1 for the myInts interceptor
+  end
+
+  it "Allows overriding a bool to false" do
+    RuntimeInterceptorConfig.provider do |bob|
+      bob.set("myString", "my super string")
+      bob.set("sub.myInts", 3)
+    end
+    RuntimeInterceptorConfig.runtime_interceptor do |name, val|
+      next false if name == "myBool"
+    end
+
+    r = RuntimeInterceptorConfig.instance
+
+    r.myBool?.should be_false
   end
 end

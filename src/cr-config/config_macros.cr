@@ -92,7 +92,8 @@ module CrConfig::Macros
           # an infinite loop of looking up a config will invoke interceptors that lookup configs that...
           @_processing_interceptor << "{{name}}"
           @@_runtime_interceptors.each do |proc|
-            if p = proc.call(full_name, @{{name}})
+            p = proc.call(full_name, @{{name}})
+            unless p.nil? # If an interceptor returns false, we want to treat that as an override
               return p.as({{val[:base_type]}})
             end
           end
