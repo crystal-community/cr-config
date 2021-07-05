@@ -27,17 +27,12 @@ module SeparateModule
 end
 
 describe "Crystal Config Modules" do
-  Spec.before_each do
-    SeparateModule::MyOtherConfig.reset
-    MyModule::MyNestedModule::MyRealConfig.reset
-  end
-
   it "Handles modules and nested modules" do
-    MyModule::MyNestedModule::MyRealConfig.provider do |bob|
+    other_bob = MyModule::MyNestedModule::MyRealConfig.new_builder.provider do |bob|
       bob.set("myString", "hope this works")
     end
 
-    m = MyModule::MyNestedModule::MyRealConfig.load
+    m = other_bob.build
 
     m.myString.should eq "hope this works"
     m.server.host.should eq "localhost"
@@ -45,12 +40,12 @@ describe "Crystal Config Modules" do
   end
 
   it "Handles other modules" do
-    SeparateModule::MyOtherConfig.provider do |bob|
+    other_bob = SeparateModule::MyOtherConfig.new_builder.provider do |bob|
       bob.set("real.server.host", "yup")
       bob.set("real.mystring", "nope")
     end
 
-    s = SeparateModule::MyOtherConfig.load
+    s = other_bob.build
 
     s.real.myString.should eq "nope"
     s.real.server.host.should eq "yup"
@@ -58,11 +53,12 @@ describe "Crystal Config Modules" do
   end
 
   it "uses the same instance" do
-    SeparateModule::MyOtherConfig.provider do |bob|
+    other_bob = SeparateModule::MyOtherConfig.new_builder.provider do |bob|
       bob.set("real.server.host", "yup")
       bob.set("real.mystring", "nope")
       bob.set("real.server.port", 8080)
     end
+    SeparateModule::MyOtherConfig.set_instance(other_bob.build)
 
     s = SeparateModule::MyOtherConfig.instance
 
@@ -75,13 +71,13 @@ describe "Crystal Config Modules" do
   end
 
   it "exposes the full list of configuration names available" do
-    SeparateModule::MyOtherConfig.provider do |bob|
+    other_bob = SeparateModule::MyOtherConfig.new_builder.provider do |bob|
       bob.set("real.server.host", "yup")
       bob.set("real.mystring", "nope") # case insensitive setting
       bob.set("real.server.port", 8080)
     end
 
-    s = SeparateModule::MyOtherConfig.instance
+    s = other_bob.build
     names = SeparateModule::MyOtherConfig.get_config_names
 
     names.should contain "real.server.host"

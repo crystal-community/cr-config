@@ -44,14 +44,8 @@ module CrConfig
 
       _generate_config_providers
 
-      def self.load
-        bob = {{@type.id.split("::")[-1].id}}ConfigBuilder.new("")
-
-        @@_providers.each do |provider|
-          provider.populate(bob)
-        end
-
-        bob.build
+      def self.new_builder
+        {{@type.id.split("::")[-1].id}}ConfigBuilder.new("")
       end
     end
   end

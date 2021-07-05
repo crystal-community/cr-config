@@ -118,7 +118,7 @@ end
 describe "CrCfg V2" do
   it "raises errors for unset properties" do
     begin
-      Test.load
+      Test.new_builder.build
     rescue e : CrConfig::ConfigException
       e.name.should eq "prop2"
       e.type.should eq CrConfig::ConfigException::Type::ConfigNotFound
@@ -126,10 +126,9 @@ describe "CrCfg V2" do
   end
 
   it "gets setup by the dumb provider" do
-    Test.providers.clear
-    Test.provider(DumbConfigProvider.new)
+    bob = Test.new_builder.provider(DumbConfigProvider.new)
 
-    t1 = Test.load
+    t1 = bob.build
     t1.prop1.should be_nil
     t1.prop2.should eq 3
     t1.prop3.should eq 4
@@ -142,10 +141,9 @@ describe "CrCfg V2" do
   end
 
   it "parses and sets JSON" do
-    Test.providers.clear
-    Test.provider(CrConfig::Providers::JsonProvider.new(json_raw))
+    bob = Test.new_builder.provider(CrConfig::Providers::JsonProvider.new(json_raw))
 
-    t = Test.load
+    t = bob.build
     t.prop1.should eq "test"
     t.prop2.should eq 2
     t.prop3.should eq 3
@@ -157,10 +155,9 @@ describe "CrCfg V2" do
   end
 
   it "parses and sets YAML" do
-    Test.providers.clear
-    Test.provider(CrConfig::Providers::YamlProvider.new(yaml_raw))
+    bob = Test.new_builder.provider(CrConfig::Providers::YamlProvider.new(yaml_raw))
 
-    t = Test.load
+    t = bob.build
     t.prop1.should eq "test"
     t.prop2.should eq 2
     t.prop3.should eq 3
@@ -172,10 +169,9 @@ describe "CrCfg V2" do
   end
 
   it "parses and sets Dotenv" do
-    Test.providers.clear
-    Test.provider(CrConfig::Providers::DotenvProvider.new(dotenv_raw))
+    bob = Test.new_builder.provider(CrConfig::Providers::DotenvProvider.new(dotenv_raw))
 
-    t = Test.load
+    t = bob.build
     t.prop1.should eq "\"test\"" # dotenv files will keep quotes around strings
     t.prop2.should eq 2
     t.prop3.should eq 3
@@ -187,10 +183,9 @@ describe "CrCfg V2" do
   end
 
   it "parses dotenv strings with commas" do
-    Test.providers.clear
-    Test.provider(CrConfig::Providers::DotenvProvider.new(dotenv_raw + "\nprop1 = test, string with,a,comma"))
+    bob = Test.new_builder.provider(CrConfig::Providers::DotenvProvider.new(dotenv_raw + "\nprop1 = test, string with,a,comma"))
 
-    t = Test.load
+    t = bob.build
     t.prop1.should eq "test, string with,a,comma"
   end
 end

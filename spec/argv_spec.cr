@@ -17,7 +17,8 @@ end
 
 describe "Command Line Parser" do
   it "parses from ARGV" do
-    ArgvConfig.providers do
+    bob = ArgvConfig.new_builder
+    bob.providers do
       CrConfig::Providers::CommandLineParser.new
     end
 
@@ -26,7 +27,7 @@ describe "Command Line Parser" do
     ARGV << "myarr=4,8,20192,-445"
     ARGV << "--sub.importantThing=3.14159265"
 
-    config = ArgvConfig.load
+    config = bob.build
 
     config.myString.should eq "abcde"
     config.myArr.should eq [4, 8, 20192, -445]

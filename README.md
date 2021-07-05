@@ -63,9 +63,15 @@ class Database
   option password : String?
 end
 
+builder = ServerConfig.new_builder
+
 # ...Configure providers, validators, interceptors here. See examples below...
 
-config = ServerConfig.instance # Will load and create a new instance of the config. Can be called repeatedly and it only loads the first time
+config = builder # Will load and create a new instance of the config. Can be called repeatedly and return new instances every time
+
+# There's an optional to use `instance` method now on the class, and can be set with the `set_instance` class method
+ServerConfig.set_instance(config)
+ServerConfig.instance # => config
 
 # These are all valid calls, and will return the relevant type
 config.domain
@@ -98,7 +104,7 @@ Crystal Config provides a list of some standard ones, but also provides a way fo
 # The order of the list matters - this will be the order that the providers get run in, and define the
 # order of precedence on which value gets set if it's found from multiple providers.
 # Last config provider wins.
-ServerConfig.providers do
+builder.providers do
   [
     CrConfig::SimpleFileProvider("config.json"), # This will read a named config file, supporting json, yaml, and .env file formats
     CrConfig::EnvVarProvider.new,                # Let environment variables set (and override) configuration values
@@ -112,12 +118,12 @@ end
 #
 # There are no limits to how many custom providers can be defined through the `provider` method, they will all be added
 # sequentially to the same list of config providers.
-ServerConfig.provider do |builder|
-  builder.set("database.hostname", "example.com")
+builder.provider do |bob|
+  bob.set("database.hostname", "example.com")
 end
 
 # The below call will trigger the above providers to be iterated through to construct the instance of ServerConfig
-s = ServerConfig.instance
+s = builder.build
 s.database.hostname # => "example.com"
 
 ```
@@ -132,7 +138,7 @@ validation might be needed to ensure bad configuration values don't cause proble
 
 # This example uses a single validator, but multiple can be defined through the `validator` method sequentially,
 # and they'll be called in the order they're defined.
-ServerConfig.validator do |name, val|
+builder.validator do |name, val|
   next if name == "schema"
 
   if val != "https" && val != "http"
@@ -140,11 +146,11 @@ ServerConfig.validator do |name, val|
   end
 end
 
-ServerConfig.provider do |builder|
+builder.provider do |builder|
   builder.set("schema", "nope")
 end
 
-ServerConfig.instance # => ConfigException(name: "schema", type: CustomValidatorError, message: "...")
+builder.build # => ConfigException(name: "schema", type: CustomValidatorError, message: "...")
 
 ```
 
@@ -159,11 +165,11 @@ defined it to be at config build time. This is to protect against infinite loops
 # Using above example classes
 
 use_stable = false
-ServerConfig.runtime_interceptor do |name, real_val|
+builder.runtime_interceptor do |name, real_val|
   next unless name == "client.host"
 
   # Runtime interceptors are called after the `instance` config gets created, so this access is safe.
-  # Trying to pre-load the `instance` before it gets created or fully configured may lead to problems.
+  # Trying to use the `instance` before it gets set will throw an exception.
   # This specific call will not invoke this runtime handler again, as the "client.host" will have already
   # recorded it's running runtime interceptors and not re-invoke them a second time.
   ServerConfig.instance.client.host
@@ -171,11 +177,11 @@ ServerConfig.runtime_interceptor do |name, real_val|
   next "stable.example.com" if use_stable
 end
 
-ServerConfig.provider do |builder|
+builder.provider do |builder|
   builder.set("client.host", "example.com")
 end
 
-s = ServerConfig.instance
+s = builder.build
 
 s.client.host # => example.com
 

@@ -8,19 +8,19 @@ end
 
 describe "File Config Provider" do
   it "loads a single file" do
-    FolderConfigProviderSpec.providers do
+    builder = FolderConfigProviderSpec.new_builder.providers do
       CrConfig::Providers::FolderConfigProvider.new
         .folder("spec/test_files/configs")
         .base_file("config.env")
     end
 
-    f = FolderConfigProviderSpec.load
+    f = builder.build
 
     f.myString.should eq "it worked!"
   end
 
   it "loads files in a particular order" do
-    FolderConfigProviderSpec.providers do
+    builder = FolderConfigProviderSpec.new_builder.providers do
       CrConfig::Providers::FolderConfigProvider.new
         .folder("spec/test_files/configs")
         .base_file("config.env")
@@ -30,11 +30,11 @@ describe "File Config Provider" do
         end
     end
 
-    f = FolderConfigProviderSpec.load
+    f = builder.build
 
     f.myString.should eq "this is the local environment"
 
-    FolderConfigProviderSpec.providers do
+    builder = FolderConfigProviderSpec.new_builder.providers do
       CrConfig::Providers::FolderConfigProvider.new
         .folder("spec/test_files/configs")
         .base_file("config.env")
@@ -44,7 +44,7 @@ describe "File Config Provider" do
         end
     end
 
-    f = FolderConfigProviderSpec.load
+    f = builder.build
 
     f.myString.should eq "this is the testing environment"
   end

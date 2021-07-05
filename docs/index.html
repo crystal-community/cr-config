@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="generator" content="Crystal Docs 0.36.1">
-<meta name="crystal_docs.project_version" content="2.1.4">
+<meta name="crystal_docs.project_version" content="3.0.0">
 <meta name="crystal_docs.project_name" content="Crystal Config">
 
 
@@ -14,7 +14,7 @@
 <script type="text/javascript" src="js/doc.js"></script>
 
   <meta name="repository-name" content="Crystal Config">
-  <title>Crystal Config 2.1.4</title>
+  <title>Crystal Config 3.0.0</title>
   <script type="text/javascript">
   CrystalDocs.base_path = "";
   </script>
@@ -40,7 +40,7 @@
       </h1>
 
       <span class="project-version">
-        2.1.4
+        3.0.0
       </span>
     </div>
   </div>
@@ -225,9 +225,15 @@ typed class. Goals are:</p>
   option password : <span class="t">String</span>?
 <span class="k">end</span>
 
+builder <span class="o">=</span> <span class="t">ServerConfig</span>.new_builder
+
 <span class="c"># ...Configure providers, validators, interceptors here. See examples below...</span>
 
-config <span class="o">=</span> <span class="t">ServerConfig</span>.instance <span class="c"># Will load and create a new instance of the config. Can be called repeatedly and it only loads the first time</span>
+config <span class="o">=</span> builder <span class="c"># Will load and create a new instance of the config. Can be called repeatedly and return new instances every time</span>
+
+<span class="c"># There&#39;s an optional to use `instance` method now on the class, and can be set with the `set_instance` class method</span>
+<span class="t">ServerConfig</span>.set_instance(config)
+<span class="t">ServerConfig</span>.instance <span class="c"># =&gt; config</span>
 
 <span class="c"># These are all valid calls, and will return the relevant type</span>
 config.domain
@@ -263,7 +269,7 @@ Crystal Config provides a list of some standard ones, but also provides a way fo
 <span class="c"># The order of the list matters - this will be the order that the providers get run in, and define the</span>
 <span class="c"># order of precedence on which value gets set if it&#39;s found from multiple providers.</span>
 <span class="c"># Last config provider wins.</span>
-<span class="t">ServerConfig</span>.providers <span class="k">do</span>
+builder.providers <span class="k">do</span>
   [
     <span class="t">CrConfig</span><span class="t">::</span><span class="t">SimpleFileProvider</span>(<span class="s">&quot;config.json&quot;</span>), <span class="c"># This will read a named config file, supporting json, yaml, and .env file formats</span>
     <span class="t">CrConfig</span><span class="t">::</span><span class="t">EnvVarProvider</span>.<span class="k">new</span>,                <span class="c"># Let environment variables set (and override) configuration values</span>
@@ -277,12 +283,12 @@ Crystal Config provides a list of some standard ones, but also provides a way fo
 <span class="c">#</span>
 <span class="c"># There are no limits to how many custom providers can be defined through the `provider` method, they will all be added</span>
 <span class="c"># sequentially to the same list of config providers.</span>
-<span class="t">ServerConfig</span>.provider <span class="k">do</span> <span class="o">|</span>builder<span class="o">|</span>
-  builder.set(<span class="s">&quot;database.hostname&quot;</span>, <span class="s">&quot;example.com&quot;</span>)
+builder.provider <span class="k">do</span> <span class="o">|</span>bob<span class="o">|</span>
+  bob.set(<span class="s">&quot;database.hostname&quot;</span>, <span class="s">&quot;example.com&quot;</span>)
 <span class="k">end</span>
 
 <span class="c"># The below call will trigger the above providers to be iterated through to construct the instance of ServerConfig</span>
-s <span class="o">=</span> <span class="t">ServerConfig</span>.instance
+s <span class="o">=</span> builder.build
 s.database.hostname <span class="c"># =&gt; &quot;example.com&quot;</span>
 </code></pre>
 
@@ -300,7 +306,7 @@ validation might be needed to ensure bad configuration values don't cause proble
 
 <span class="c"># This example uses a single validator, but multiple can be defined through the `validator` method sequentially,</span>
 <span class="c"># and they&#39;ll be called in the order they&#39;re defined.</span>
-<span class="t">ServerConfig</span>.validator <span class="k">do</span> <span class="o">|</span>name, val<span class="o">|</span>
+builder.validator <span class="k">do</span> <span class="o">|</span>name, val<span class="o">|</span>
   <span class="k">next</span> <span class="k">if</span> name <span class="o">==</span> <span class="s">&quot;schema&quot;</span>
 
   <span class="k">if</span> val <span class="o">!=</span> <span class="s">&quot;https&quot;</span> && val <span class="o">!=</span> <span class="s">&quot;http&quot;</span>
@@ -308,11 +314,11 @@ validation might be needed to ensure bad configuration values don't cause proble
   <span class="k">end</span>
 <span class="k">end</span>
 
-<span class="t">ServerConfig</span>.provider <span class="k">do</span> <span class="o">|</span>builder<span class="o">|</span>
+builder.provider <span class="k">do</span> <span class="o">|</span>builder<span class="o">|</span>
   builder.set(<span class="s">&quot;schema&quot;</span>, <span class="s">&quot;nope&quot;</span>)
 <span class="k">end</span>
 
-<span class="t">ServerConfig</span>.instance <span class="c"># =&gt; ConfigException(name: &quot;schema&quot;, type: CustomValidatorError, message: &quot;...&quot;)</span>
+builder.build <span class="c"># =&gt; ConfigException(name: &quot;schema&quot;, type: CustomValidatorError, message: &quot;...&quot;)</span>
 </code></pre>
 
 <h2><a id="runtime-configuration-interceptors" class="anchor" href="#runtime-configuration-interceptors">
@@ -330,11 +336,11 @@ defined it to be at config build time. This is to protect against infinite loops
 <pre><code class="language-crystal"><span class="c"># Using above example classes</span>
 
 use_stable <span class="o">=</span> <span class="n">false</span>
-<span class="t">ServerConfig</span>.runtime_interceptor <span class="k">do</span> <span class="o">|</span>name, real_val<span class="o">|</span>
+builder.runtime_interceptor <span class="k">do</span> <span class="o">|</span>name, real_val<span class="o">|</span>
   <span class="k">next</span> <span class="k">unless</span> name <span class="o">==</span> <span class="s">&quot;client.host&quot;</span>
 
   <span class="c"># Runtime interceptors are called after the `instance` config gets created, so this access is safe.</span>
-  <span class="c"># Trying to pre-load the `instance` before it gets created or fully configured may lead to problems.</span>
+  <span class="c"># Trying to use the `instance` before it gets set will throw an exception.</span>
   <span class="c"># This specific call will not invoke this runtime handler again, as the &quot;client.host&quot; will have already</span>
   <span class="c"># recorded it&#39;s running runtime interceptors and not re-invoke them a second time.</span>
   <span class="t">ServerConfig</span>.instance.client.host
@@ -342,11 +348,11 @@ use_stable <span class="o">=</span> <span class="n">false</span>
   <span class="k">next</span> <span class="s">&quot;stable.example.com&quot;</span> <span class="k">if</span> use_stable
 <span class="k">end</span>
 
-<span class="t">ServerConfig</span>.provider <span class="k">do</span> <span class="o">|</span>builder<span class="o">|</span>
+builder.provider <span class="k">do</span> <span class="o">|</span>builder<span class="o">|</span>
   builder.set(<span class="s">&quot;client.host&quot;</span>, <span class="s">&quot;example.com&quot;</span>)
 <span class="k">end</span>
 
-s <span class="o">=</span> <span class="t">ServerConfig</span>.instance
+s <span class="o">=</span> builder.build
 
 s.client.host <span class="c"># =&gt; example.com</span>
 

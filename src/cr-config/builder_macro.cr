@@ -44,6 +44,52 @@ module CrConfig
     # Does exactly what its name implies
     macro _generate_builder
       class {{@type.id.split("::")[-1].id}}ConfigBuilder < AbstractBuilder
+        @_base_name : String
+        @_runtime_interceptors = [] of Proc(String, AllTypes?, AllTypes?)
+        @_providers = [] of Providers::AbstractProvider
+        @_validators = [] of Proc(String, AllTypes?, Nil)
+
+        # Add a validator that will be called when building the config class. Validators will receive the config name and
+        # the configured value, and can throw an exception if the configuration isn't valid.
+        def validator(&block : (String, AllTypes?) -> Nil)
+          @_validators << block
+          self
+        end
+
+        # Add a runtime interceptor that will be called when any config property is accessed. Runtime interceptors will be
+        # called with the config name and the existing config value. If the interceptor returns nil, the existing value gets
+        # used. If the interceptor returns anything not-nil, that will override the existing value.
+        #
+        # Multiple runtime interceptors can be added, but only the first to return a non-nil value will override the value.
+        def runtime_interceptor(&block : (String, AllTypes?) -> AllTypes?)
+          @_runtime_interceptors << block
+          self
+        end
+
+        # Add a configuration provider that will be invoked during the `build` method.
+        def provider(provider : Providers::AbstractProvider)
+          @_providers << provider
+          self
+        end
+
+        # :ditto:
+        def provider(&block : AbstractBuilder -> Nil)
+          @_providers << Providers::ProcProvider.new(block)
+          self
+        end
+
+        # Add a list of configuration providers through a block. The block should return a config provider, or an array of config
+        # providers. This method overrides whatever the current list of providers is, and the order will be preserved during calling.
+        def providers(&block)
+          providers = yield
+          if providers.is_a?(Array)
+            @_providers = providers.map &.as(Providers::AbstractProvider)
+          elsif providers.is_a?(Providers::AbstractProvider)
+            @_providers = [providers.as(Providers::AbstractProvider)]
+          end
+          self
+        end
+
         {% verbatim do %}
         macro _get_default_for_type(default, type)
           {% if default != nil %}
@@ -52,9 +98,7 @@ module CrConfig
             nil
           {% end %}
         end
-
         {% end %}
-
 
         # NOTE: The compiler is not nice if you try to be too clever and abstract out these common blocks of casting
         # into another macro / method / recursively, and compile times may increase. Compile with `--stats` to see
@@ -124,7 +168,6 @@ module CrConfig
         {% end %}
         {% end %}
 
-        @_base_name : String
 
         def initialize(@_base_name : String)
           {% for name, props in CONFIG_PROPS %}
@@ -167,7 +210,7 @@ module CrConfig
           return false
         end
 
-        private def validate_settings(validators)
+        private def _validate_settings(validators)
           # TODO: gracefully generate a new config?
           {% for name, props in CONFIG_PROPS %}
           {% unless props[:nilable] %}
@@ -192,13 +235,16 @@ module CrConfig
           {% end %}
         end
 
-        def build(validators = {{@type}}._validators, interceptors = {{@type}}._runtime_interceptors)
-          validate_settings(validators)
+        def build(validators = @_validators, interceptors = @_runtime_interceptors)
+          @_providers.each do |provider|
+            provider.populate(self)
+          end
 
-          {{@type}}._runtime_interceptors = interceptors
+          _validate_settings(validators)
 
           {{@type}}.new(
             @_base_name,
+            interceptors,
             {% for name, props in CONFIG_PROPS %}
             {% if props[:is_base_type] %}
             @{{name}}{% if !props[:nilable] %}.not_nil!{% end %},

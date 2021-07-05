@@ -14,24 +14,20 @@ class ValidatorSubConfig
 end
 
 describe "Validators" do
-  Spec.before_each do
-    ValidatorConfig.reset
-  end
-
   it "provides a validation check" do
-    ValidatorConfig.provider do |bob|
+    builder = ValidatorConfig.new_builder.provider do |bob|
       bob.set("myStrings", "yes")
       bob.set("sub.myFloats", "5")
     end
 
     # This is relying on the validators running in the order the configurations are defined in the config class
-    ValidatorConfig.validator do |name, val|
+    builder.validator do |name, val|
       name.should eq "myStrings"
       raise "#{val.to_s} is an invalid config!"
     end
 
     begin
-      v = ValidatorConfig.load
+      v = builder.build
       fail("Should have received an exception during configuration loading")
     rescue e : CrConfig::ConfigException
       e.message.not_nil!.should end_with "[\"yes\"] is an invalid config!"
@@ -41,17 +37,17 @@ describe "Validators" do
   end
 
   it "enumerates through all configs" do
-    ValidatorConfig.provider do |bob|
+    builder = ValidatorConfig.new_builder.provider do |bob|
       bob.set("myStrings", "yes")
       bob.set("sub.myFloats", "5")
     end
 
     encountered = [] of String
-    ValidatorConfig.validator do |name, val|
+    builder.validator do |name, val|
       encountered << name
     end
 
-    v = ValidatorConfig.load
+    v = builder.build
 
     v.myStrings.should eq ["yes"]
     v.sub.myFloats.should eq [5.0]

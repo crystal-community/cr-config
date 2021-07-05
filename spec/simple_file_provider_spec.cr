@@ -10,10 +10,9 @@ end
 
 describe "Simple File Provider" do
   it "parses json" do
-    SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.provider(CrConfig::Providers::SimpleFileProvider.new("spec/test_files/simple_file_provider_spec/test.json"))
+    bob = SimpleFileProviderConfig.new_builder.provider(CrConfig::Providers::SimpleFileProvider.new("spec/test_files/simple_file_provider_spec/test.json"))
 
-    s = SimpleFileProviderConfig.load
+    s = bob.build
 
     s.str_option.should eq "this is a string"
     s.arr_int32.should eq [20394, 80980]
@@ -21,10 +20,9 @@ describe "Simple File Provider" do
   end
 
   it "parses yaml" do
-    SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.provider(CrConfig::Providers::SimpleFileProvider.new("spec/test_files/simple_file_provider_spec/test.yaml"))
+    bob = SimpleFileProviderConfig.new_builder.provider(CrConfig::Providers::SimpleFileProvider.new("spec/test_files/simple_file_provider_spec/test.yaml"))
 
-    s = SimpleFileProviderConfig.load
+    s = bob.build
 
     s.str_option.should eq "this is a string"
     s.arr_int32.should eq [20394, 80980]
@@ -32,10 +30,9 @@ describe "Simple File Provider" do
   end
 
   it "parses env" do
-    SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.provider(CrConfig::Providers::SimpleFileProvider.new("spec/test_files/simple_file_provider_spec/test.env"))
+    bob = SimpleFileProviderConfig.new_builder.provider(CrConfig::Providers::SimpleFileProvider.new("spec/test_files/simple_file_provider_spec/test.env"))
 
-    s = SimpleFileProviderConfig.load
+    s = bob.build
 
     s.str_option.should eq "this is a string"
     s.arr_int32.should eq [20394, 80980]
@@ -46,25 +43,22 @@ end
 # Re-using the simple config above
 describe "Config Builder" do
   it "merges multiple sources" do
-    SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.providers do
+    bob = SimpleFileProviderConfig.new_builder.providers do
       [
         CrConfig::Providers::DotenvProvider.new("str_option=this is a string"),
         CrConfig::Providers::DotenvProvider.new("arr_int32=3"),
       ]
     end
 
-    s = SimpleFileProviderConfig.load
+    s = bob.build
 
     s.str_option.should eq "this is a string"
     s.arr_int32.should eq [3]
   end
 
   it "requires non-nilable fields to be provided" do
-    SimpleFileProviderConfig.providers.clear
-
     begin
-      SimpleFileProviderConfig.load
+      SimpleFileProviderConfig.new_builder.build
     rescue e : CrConfig::ConfigException
       e.type.should eq CrConfig::ConfigException::Type::ConfigNotFound
       e.name.should eq "str_option"
@@ -72,8 +66,7 @@ describe "Config Builder" do
   end
 
   it "uses config precedence" do
-    SimpleFileProviderConfig.providers.clear
-    SimpleFileProviderConfig.providers do
+    bob = SimpleFileProviderConfig.new_builder.providers do
       [
         CrConfig::Providers::DotenvProvider.new("str_option=this is a string"),
         CrConfig::Providers::DotenvProvider.new("arr_int32=3"),
@@ -81,7 +74,7 @@ describe "Config Builder" do
       ]
     end
 
-    s = SimpleFileProviderConfig.load
+    s = bob.build
 
     s.str_option.should eq "this is a string"
     s.arr_int32.should eq [5, 6, 7]
