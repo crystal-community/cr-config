@@ -82,7 +82,7 @@ module CrConfig::Macros
         return {{name}}{% if props[:base_type].id == Bool.id %}?{% end %}
       {% else %}
       when "{{name.downcase}}"
-        return @{{name}}[rest]
+        return @{{name}}[rest]?
       {% end %}
       {% end %}
       else

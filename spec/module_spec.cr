@@ -89,4 +89,20 @@ describe "Crystal Config Modules" do
     s["real.server.port"].should eq 8080
     s["real.myString"].should eq "nope"
   end
+
+  it "missing key names refer to the full key name" do
+    other_bob = SeparateModule::MyOtherConfig.new_builder.provider do |bob|
+      bob.set("real.server.host", "yup")
+      bob.set("real.mystring", "nope") # case insensitive setting
+      bob.set("real.server.port", 8080)
+    end
+
+    s = other_bob.build
+
+    begin
+      s["real.server.nope"]
+    rescue e : KeyError
+      e.message.not_nil!.should contain "real.server.nope"
+    end
+  end
 end
