@@ -14,6 +14,7 @@ module MyModule
 
       option host : String, default: "localhost"
       option port : Int32?
+      option bool : Bool, default: false
     end
   end
 end
@@ -83,7 +84,7 @@ describe "Crystal Config Modules" do
     names.should contain "real.server.host"
     names.should contain "real.myString"
     names.should contain "real.server.port"
-    names.size.should eq 3
+    names.size.should eq 4
 
     s["real.server.host"].should eq "yup"
     s["real.server.port"].should eq 8080
@@ -92,8 +93,7 @@ describe "Crystal Config Modules" do
 
   it "missing key names refer to the full key name" do
     other_bob = SeparateModule::MyOtherConfig.new_builder.provider do |bob|
-      bob.set("real.server.host", "yup")
-      bob.set("real.mystring", "nope") # case insensitive setting
+      bob.set("real.mystring", "nope")
       bob.set("real.server.port", 8080)
     end
 
@@ -104,5 +104,16 @@ describe "Crystal Config Modules" do
     rescue e : KeyError
       e.message.not_nil!.should contain "real.server.nope"
     end
+  end
+
+  it "[] works with bool subconfig names when they're false" do
+    other_bob = SeparateModule::MyOtherConfig.new_builder.provider do |bob|
+      bob.set("real.mystring", "nope")
+      bob.set("real.server.port", 8080)
+    end
+
+    s = other_bob.build
+
+    s["real.server.bool"].should be_false
   end
 end

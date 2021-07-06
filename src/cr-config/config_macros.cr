@@ -93,8 +93,9 @@ module CrConfig::Macros
     end
 
     def [](key : String)
-      if val = self[key]?
-        return val
+      val = self[key]?
+      unless val.nil?
+        return val.not_nil!
       end
       raise KeyError.new("Missing configuration key #{key}")
     end
