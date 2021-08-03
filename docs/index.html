@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="generator" content="Crystal Docs 0.36.1">
+<meta name="generator" content="Crystal Docs 1.0.0">
 <meta name="crystal_docs.project_version" content="3.0.2">
 <meta name="crystal_docs.project_name" content="Crystal Config">
 
@@ -229,7 +229,7 @@ builder <span class="o">=</span> <span class="t">ServerConfig</span>.new_builder
 
 <span class="c"># ...Configure providers, validators, interceptors here. See examples below...</span>
 
-config <span class="o">=</span> builder <span class="c"># Will load and create a new instance of the config. Can be called repeatedly and return new instances every time</span>
+config <span class="o">=</span> builder.build <span class="c"># Will load and create a new instance of the config. Can be called repeatedly and return new instances every time</span>
 
 <span class="c"># There&#39;s an optional to use `instance` method now on the class, and can be set with the `set_instance` class method</span>
 <span class="t">ServerConfig</span>.set_instance(config)

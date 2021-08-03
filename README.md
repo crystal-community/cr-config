@@ -67,7 +67,7 @@ builder = ServerConfig.new_builder
 
 # ...Configure providers, validators, interceptors here. See examples below...
 
-config = builder # Will load and create a new instance of the config. Can be called repeatedly and return new instances every time
+config = builder.build # Will load and create a new instance of the config. Can be called repeatedly and return new instances every time
 
 # There's an optional to use `instance` method now on the class, and can be set with the `set_instance` class method
 ServerConfig.set_instance(config)
