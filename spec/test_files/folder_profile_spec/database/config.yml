@@ -1,0 +1,4 @@
+database:
+  host: the real host
+  username: db_prod
+  password: cleartext password

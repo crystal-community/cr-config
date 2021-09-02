@@ -335,5 +335,87 @@ module CrConfig
         end
       end
     end
+
+    # Will load different configuration files in a tree of folders based on configuration profile settings
+    #
+    # Provider that will visit all folders directly under a root folder, and attempt to load config files in those folders
+    # using a ProfileFileConfigProvider to select which config files to load.
+    #
+    # Assume a folder structure like:
+    # root_config
+    # ├── database
+    # │ ├── config.local.yml
+    # │ ├── config.test.yml
+    # │ └── config.yml
+    # ├── misc
+    # │ ├── config.test.yml
+    # │ └── config.yml
+    # └── server
+    #     ├── config.local.yml
+    #     └── config.yml
+    #
+    # Then
+    # ```
+    # FolderProfileConfigProvider.new
+    #   .folder("root_config")
+    #   .base_file("config.yml")
+    #   .profiles { ["test"] }
+    # ```
+    # Will read configuration files in this order:
+    # root_config/database/config.yml
+    # root_config/database/config.test.yml
+    # root_config/misc/config.yml
+    # root_config/misc/config.test.yml
+    # root_config/server/config.yml
+    class FolderProfileConfigProvider < AbstractProvider
+      @folder_path = ""
+      @profile_separator = "."
+      @base_file = ""
+
+      # Seperator to use when constructing the different profile versions of the config file. See `#populate` for details on file construction
+      def separator(@profile_separator : String)
+        self
+      end
+
+      def folder(@folder_path : String)
+        self
+      end
+
+      # Base name for the configuration files
+      def base_file(@base_file : String)
+        self
+      end
+
+      # Block to be run when determining which "profiles" to load
+      def profiles(&block : -> Array(String))
+        @profiles = block
+        self
+      end
+
+      def populate(bob : AbstractBuilder)
+        logger = ::Log.for(FolderConfigProvider)
+
+        unless File.exists?(@folder_path)
+          logger.warn { "Unable to find folder #{@folder_path}" }
+          return
+        end
+
+        if profs = @profiles
+          profiles = profs.call
+        else
+          profiles = [] of String
+        end
+
+        Dir.children(@folder_path).each do |folder|
+          ProfileFileConfigProvider.new
+            .folder("#{@folder_path}/#{folder}")
+            .base_file(@base_file)
+            .separator(@profile_separator)
+            .profiles do
+              profiles
+            end.populate(bob)
+        end
+      end
+    end
   end
 end

@@ -8,13 +8,13 @@
 <meta name="crystal_docs.project_name" content="Crystal Config">
 
 
-    <link rel="canonical" href="https://github.com/tsornson/cr-config/CrConfig/Providers/AbstractProvider.html">
+    <link rel="canonical" href="https://github.com/tsornson/cr-config/CrConfig/Providers/FolderProfileConfigProvider.html">
 
 <link href="../../css/style.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="../../js/doc.js"></script>
 
   <meta name="repository-name" content="Crystal Config">
-  <title>CrConfig::Providers::AbstractProvider - Crystal Config 4.0.0</title>
+  <title>CrConfig::Providers::FolderProfileConfigProvider - Crystal Config 4.0.0</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../../";
   </script>
@@ -102,7 +102,7 @@
       
         <ul>
   
-  <li class=" current" data-id="Crystal Config/CrConfig/Providers/AbstractProvider" data-name="crconfig::providers::abstractprovider">
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/AbstractProvider" data-name="crconfig::providers::abstractprovider">
       <a href="../../CrConfig/Providers/AbstractProvider.html">AbstractProvider</a>
       
     </li>
@@ -127,7 +127,7 @@
       
     </li>
   
-  <li class=" " data-id="Crystal Config/CrConfig/Providers/FolderProfileConfigProvider" data-name="crconfig::providers::folderprofileconfigprovider">
+  <li class=" current" data-id="Crystal Config/CrConfig/Providers/FolderProfileConfigProvider" data-name="crconfig::providers::folderprofileconfigprovider">
       <a href="../../CrConfig/Providers/FolderProfileConfigProvider.html">FolderProfileConfigProvider</a>
       
     </li>
@@ -176,12 +176,12 @@
 <div class="main-content">
 <h1 class="type-name">
 
-  <span class="kind">abstract class</span> CrConfig::Providers::AbstractProvider
+  <span class="kind">class</span> CrConfig::Providers::FolderProfileConfigProvider
 
 </h1>
 
 
-  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../CrConfig/Providers/AbstractProvider.html">CrConfig::Providers::AbstractProvider</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../CrConfig/Providers/FolderProfileConfigProvider.html">CrConfig::Providers::FolderProfileConfigProvider</a></li><li class="superclass"><a href="../../CrConfig/Providers/AbstractProvider.html">CrConfig::Providers::AbstractProvider</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
 
 
 
@@ -195,13 +195,38 @@
     Overview
   </h2>
 
-  <p>Base class for all providers.</p>
+  <p>Will load different configuration files in a tree of folders based on configuration profile settings</p>
 
-<p>A configuration provider represents a single source for where configuration values can be
-read from, whether it be from a configuration file (<code><a href="../../CrConfig/Providers/SimpleFileProvider.html">SimpleFileProvider</a></code>), and environment
-variable (<code><a href="../../CrConfig/Providers/EnvVarProvider.html">EnvVarProvider</a></code>), or even a custom location (see <code><a href="../../CrConfig/Providers/ProcProvider.html">ProcProvider</a></code>). Configuration
-providers have their <code><a href="../../CrConfig/Providers/AbstractProvider.html#populate(bob:AbstractBuilder)-instance-method">#populate</a></code> method invoked during the building of the configuration class
-which lets them provide what config values they have available.</p>
+<p>Provider that will visit all folders directly under a root folder, and attempt to load config files in those folders
+using a ProfileFileConfigProvider to select which config files to load.</p>
+
+<p>Assume a folder structure like:
+root_config
+├── database
+│ ├── config.local.yml
+│ ├── config.test.yml
+│ └── config.yml
+├── misc
+│ ├── config.test.yml
+│ └── config.yml
+└── server</p>
+
+<pre><code class="language-crystal">├── config.local.yml
+└── config.yml</code></pre>
+
+<p>Then</p>
+
+<pre><code class="language-crystal"><span class="t">FolderProfileConfigProvider</span>.<span class="k">new</span>
+  .folder(<span class="s">&quot;root_config&quot;</span>)
+  .base_file(<span class="s">&quot;config.yml&quot;</span>)
+  .profiles { [<span class="s">&quot;test&quot;</span>] }</code></pre>
+
+<p>Will read configuration files in this order:
+root_config/database/config.yml
+root_config/database/config.test.yml
+root_config/misc/config.yml
+root_config/misc/config.test.yml
+root_config/server/config.yml</p>
 
 
 
@@ -210,38 +235,6 @@ which lets them provide what config values they have available.</p>
 
 
 
-
-  <h2>
-    <a id="direct-known-subclasses" class="anchor" href="#direct-known-subclasses">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Direct Known Subclasses
-  </h2>
-  <ul class="other-types-list">
-    
-      <li class="other-type"><a href="../../CrConfig/Providers/CommandLineParser.html">CrConfig::Providers::CommandLineParser</a></li>
-    
-      <li class="other-type"><a href="../../CrConfig/Providers/DotenvProvider.html">CrConfig::Providers::DotenvProvider</a></li>
-    
-      <li class="other-type"><a href="../../CrConfig/Providers/EnvVarProvider.html">CrConfig::Providers::EnvVarProvider</a></li>
-    
-      <li class="other-type"><a href="../../CrConfig/Providers/FolderConfigProvider.html">CrConfig::Providers::FolderConfigProvider</a></li>
-    
-      <li class="other-type"><a href="../../CrConfig/Providers/FolderProfileConfigProvider.html">CrConfig::Providers::FolderProfileConfigProvider</a></li>
-    
-      <li class="other-type"><a href="../../CrConfig/Providers/JsonProvider.html">CrConfig::Providers::JsonProvider</a></li>
-    
-      <li class="other-type"><a href="../../CrConfig/Providers/ProcProvider.html">CrConfig::Providers::ProcProvider</a></li>
-    
-      <li class="other-type"><a href="../../CrConfig/Providers/ProfileFileConfigProvider.html">CrConfig::Providers::ProfileFileConfigProvider</a></li>
-    
-      <li class="other-type"><a href="../../CrConfig/Providers/SimpleFileProvider.html">CrConfig::Providers::SimpleFileProvider</a></li>
-    
-      <li class="other-type"><a href="../../CrConfig/Providers/YamlProvider.html">CrConfig::Providers::YamlProvider</a></li>
-    
-  </ul>
 
 
 
@@ -258,7 +251,7 @@ which lets them provide what config values they have available.</p>
   </h2>
   
     
-      <a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L30" target="_blank">
+      <a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L370" target="_blank">
         cr-config/abstract_provider.cr
       </a>
     
@@ -284,9 +277,35 @@ which lets them provide what config values they have available.</p>
   <ul class="list-summary">
     
       <li class="entry-summary">
+        <a href="#base_file(base_file:String)-instance-method" class="signature"><strong>#base_file</strong>(base_file : String)</a>
+        
+          <div class="summary"><p>Base name for the configuration files</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#folder(folder_path:String)-instance-method" class="signature"><strong>#folder</strong>(folder_path : String)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
         <a href="#populate(bob:AbstractBuilder)-instance-method" class="signature"><strong>#populate</strong>(bob : AbstractBuilder)</a>
         
           <div class="summary"><p>This method gets called with the instance of the configuration builder during config building.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#profiles(&block:-%3EArray(String))-instance-method" class="signature"><strong>#profiles</strong>(&block :  -> Array(String))</a>
+        
+          <div class="summary"><p>Block to be run when determining which "profiles" to load</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#separator(profile_separator:String)-instance-method" class="signature"><strong>#separator</strong>(profile_separator : String)</a>
+        
+          <div class="summary"><p>Seperator to use when constructing the different profile versions of the config file.</p></div>
         
       </li>
     
@@ -297,6 +316,25 @@ which lets them provide what config values they have available.</p>
 
 
 <div class="methods-inherited">
+  
+    
+
+  <h3>Instance methods inherited from class <code><a href="../../CrConfig/Providers/AbstractProvider.html">CrConfig::Providers::AbstractProvider</a></code></h3>
+  
+  
+    <a href="../../CrConfig/Providers/AbstractProvider.html#populate(bob:AbstractBuilder)-instance-method" class="tooltip">
+      <span>populate(bob : AbstractBuilder)</span>
+    populate</a>
+    
+  
+
+
+    
+
+
+    
+
+
   
     
 
@@ -334,15 +372,56 @@ which lets them provide what config values they have available.</p>
     Instance Method Detail
   </h2>
   
+    <div class="entry-detail" id="base_file(base_file:String)-instance-method">
+      <div class="signature">
+        
+        def <strong>base_file</strong>(base_file : String)
+
+        <a class="method-permalink" href="#base_file(base_file:String)-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Base name for the configuration files</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L385" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="folder(folder_path:String)-instance-method">
+      <div class="signature">
+        
+        def <strong>folder</strong>(folder_path : String)
+
+        <a class="method-permalink" href="#folder(folder_path:String)-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L380" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
     <div class="entry-detail" id="populate(bob:AbstractBuilder)-instance-method">
       <div class="signature">
-        abstract 
+        
         def <strong>populate</strong>(bob : <a href="../../CrConfig/AbstractBuilder.html">AbstractBuilder</a>)
 
         <a class="method-permalink" href="#populate(bob:AbstractBuilder)-instance-method">#</a>
       </div>
       
         <div class="doc">
+          
+            <div class="doc-inherited">
+              Description copied from class <a href="../../CrConfig/Providers/AbstractProvider.html">CrConfig::Providers::AbstractProvider</a>
+            </div>
           
           <p>This method gets called with the instance of the configuration builder during config building.</p>
 
@@ -352,7 +431,49 @@ which lets them provide what config values they have available.</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L34" target="_blank">View source</a>]
+          [<a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L395" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="profiles(&amp;block:-&gt;Array(String))-instance-method">
+      <div class="signature">
+        
+        def <strong>profiles</strong>(&block :  -> Array(String))
+
+        <a class="method-permalink" href="#profiles(&block:-%3EArray(String))-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Block to be run when determining which "profiles" to load</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L390" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="separator(profile_separator:String)-instance-method">
+      <div class="signature">
+        
+        def <strong>separator</strong>(profile_separator : String)
+
+        <a class="method-permalink" href="#separator(profile_separator:String)-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Seperator to use when constructing the different profile versions of the config file. See <code><a href="../../CrConfig/Providers/FolderProfileConfigProvider.html#populate(bob:AbstractBuilder)-instance-method">#populate</a></code> for details on file construction</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L376" target="_blank">View source</a>]
         
       </div>
     </div>
