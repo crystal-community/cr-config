@@ -1,3 +1,4 @@
+require "log"
 require "./abstract_provider.cr"
 require "csv" # Used for parsing strings => Array(String) (let it deal with double quotes and whatnot)
 

@@ -137,6 +137,11 @@
       
     </li>
   
+  <li class=" " data-id="Crystal Config/CrConfig/Providers/ProfileFileConfigProvider" data-name="crconfig::providers::profilefileconfigprovider">
+      <a href="../../CrConfig/Providers/ProfileFileConfigProvider.html">ProfileFileConfigProvider</a>
+      
+    </li>
+  
   <li class=" " data-id="Crystal Config/CrConfig/Providers/SimpleFileProvider" data-name="crconfig::providers::simplefileprovider">
       <a href="../../CrConfig/Providers/SimpleFileProvider.html">SimpleFileProvider</a>
       
@@ -185,30 +190,10 @@
     Overview
   </h2>
 
-  <p>Handles and loads up an entire directory of configuration files</p>
+  <p>Loads all files found in folder / directory</p>
 
-<p>This provider is best used when there is a single "base" configuration file that has all configurations
-defined, and then other configuration files can be layered on top of that one, providing overrides based
-on the environment the application runs in.</p>
-
-<p>This provider has lots of configuration switches that can be used when loading files from a directory</p>
-
-<pre><code class="language-crystal"><span class="c"># Assume directory `configs` exists and contains `config-base.yaml`, `config-test.yaml`, `config-local.yaml`, and `config-prod.yaml`</span>
-
-<span class="t">CrConfig</span><span class="t">::</span><span class="t">Providers</span><span class="t">::</span><span class="t">FolderConfigProvirer</span>.<span class="k">new</span>
-  .folder(<span class="s">&quot;configs&quot;</span>)
-  .separator(<span class="s">&quot;-&quot;</span>)
-  .base_file(<span class="s">&quot;config.yaml&quot;</span>)
-  .profiles <span class="k">do</span>
-    <span class="c"># Here is where a list of &quot;profiles&quot; of configurations can be provided.</span>
-    <span class="c"># These can be obtained from anywhere that&#39;s appropriate (obviously before</span>
-    <span class="c"># configuration has completed being read in), such as an environment variable.</span>
-    [<span class="s">&quot;base&quot;</span>, <span class="s">&quot;test&quot;</span>, <span class="s">&quot;prod&quot;</span>]
-  <span class="k">end</span></code></pre>
-
-<p>The above provider, when its <code><a href="../../CrConfig/Providers/FolderConfigProvider.html#populate(bob:AbstractBuilder)-instance-method">#populate</a></code> method is called, will read in and load <code>config-base.yaml</code>, <code>config-test.yaml</code>, and <code>config-prod.yaml</code>,
-in that order, leaving the production configurations as having the highest precedence. <code>config-local.yaml</code> won't be read, and a file named
-<code>config.yaml</code> doesn't need to exist.</p>
+<p>This provider will iterate through all children files in a specified directory and use a SimpleFileProvider to load them. Will not
+step into subfolders.</p>
 
 
 
@@ -233,7 +218,7 @@ in that order, leaving the production configurations as having the highest prece
   </h2>
   
     
-      <a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L246" target="_blank">
+      <a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L321" target="_blank">
         cr-config/abstract_provider.cr
       </a>
     
@@ -243,6 +228,23 @@ in that order, leaving the production configurations as having the highest prece
 
 
 
+
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new(folder_path:String)-class-method" class="signature"><strong>.new</strong>(folder_path : String)</a>
+        
+      </li>
+    
+  </ul>
 
 
 
@@ -259,37 +261,9 @@ in that order, leaving the production configurations as having the highest prece
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#base_file(base_file:String)-instance-method" class="signature"><strong>#base_file</strong>(base_file : String)</a>
-        
-          <div class="summary"><p>Base name for the configuration files</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#folder(folder_path:String)-instance-method" class="signature"><strong>#folder</strong>(folder_path : String)</a>
-        
-          <div class="summary"><p>Base folder path to read config files from, relative from where the server is running from</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
         <a href="#populate(bob:AbstractBuilder)-instance-method" class="signature"><strong>#populate</strong>(bob : AbstractBuilder)</a>
         
-          <div class="summary"><p>Will read in and and load files, used the <code><a href="../../CrConfig/Providers/SimpleFileProvider.html">SimpleFileProvider</a></code> to perform the actual file reading, configuration files under <code>"#{@filder_path}/#{file_name}"</code>, for every file name constructed from the <code>@base_file</code> and list of <code><a href="../../CrConfig/Providers/FolderConfigProvider.html#profiles(&block:-%3EArray(String))-instance-method">#profiles</a></code> provided.</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#profiles(&block:-%3EArray(String))-instance-method" class="signature"><strong>#profiles</strong>(&block :  -> Array(String))</a>
-        
-          <div class="summary"><p>Block to be run when determining which "profiles" to load</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#separator(profile_separator:String)-instance-method" class="signature"><strong>#separator</strong>(profile_separator : String)</a>
-        
-          <div class="summary"><p>Seperator to use when constructing the different profile versions of the config file.</p></div>
+          <div class="summary"><p>This method gets called with the instance of the configuration builder during config building.</p></div>
         
       </li>
     
@@ -343,6 +317,32 @@ in that order, leaving the production configurations as having the highest prece
 </div>
 
 
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(folder_path:String)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(folder_path : String)
+
+        <a class="method-permalink" href="#new(folder_path:String)-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L322" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
 
 
 
@@ -356,48 +356,6 @@ in that order, leaving the production configurations as having the highest prece
     Instance Method Detail
   </h2>
   
-    <div class="entry-detail" id="base_file(base_file:String)-instance-method">
-      <div class="signature">
-        
-        def <strong>base_file</strong>(base_file : String)
-
-        <a class="method-permalink" href="#base_file(base_file:String)-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>Base name for the configuration files</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L260" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="folder(folder_path:String)-instance-method">
-      <div class="signature">
-        
-        def <strong>folder</strong>(folder_path : String)
-
-        <a class="method-permalink" href="#folder(folder_path:String)-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>Base folder path to read config files from, relative from where the server is running from</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L255" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
     <div class="entry-detail" id="populate(bob:AbstractBuilder)-instance-method">
       <div class="signature">
         
@@ -408,59 +366,19 @@ in that order, leaving the production configurations as having the highest prece
       
         <div class="doc">
           
-          <p>Will read in and and load files, used the <code><a href="../../CrConfig/Providers/SimpleFileProvider.html">SimpleFileProvider</a></code> to perform the actual file reading, configuration files under
-<code>"#{@filder_path}/#{file_name}"</code>, for every file name constructed from the <code>@base_file</code> and list of <code><a href="../../CrConfig/Providers/FolderConfigProvider.html#profiles(&block:-%3EArray(String))-instance-method">#profiles</a></code> provided.</p>
-
-<p>Given base file name <code>config.json</code>, a list of profiles <code>["prof1"]</code>, and separator of <code>_</code>, this will attempt to load all files
-in <code>["config_prof1.json"]</code> under the provided folder_path. The profiles and separator are inserted where the file extension is found in the base file name.</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L275" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="profiles(&amp;block:-&gt;Array(String))-instance-method">
-      <div class="signature">
-        
-        def <strong>profiles</strong>(&block :  -> Array(String))
-
-        <a class="method-permalink" href="#profiles(&block:-%3EArray(String))-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
+            <div class="doc-inherited">
+              Description copied from class <a href="../../CrConfig/Providers/AbstractProvider.html">CrConfig::Providers::AbstractProvider</a>
+            </div>
           
-          <p>Block to be run when determining which "profiles" to load</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L265" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="separator(profile_separator:String)-instance-method">
-      <div class="signature">
-        
-        def <strong>separator</strong>(profile_separator : String)
+          <p>This method gets called with the instance of the configuration builder during config building.</p>
 
-        <a class="method-permalink" href="#separator(profile_separator:String)-instance-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>Seperator to use when constructing the different profile versions of the config file. See <code><a href="../../CrConfig/Providers/FolderConfigProvider.html#populate(bob:AbstractBuilder)-instance-method">#populate</a></code> for details on file construction</p>
+<p>Use this method to populate the builder with any configuration name / values that this provider... provides</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L250" target="_blank">View source</a>]
+          [<a href="https://github.com/vici37/cr-config/blob/master/src/cr-config/abstract_provider.cr#L325" target="_blank">View source</a>]
         
       </div>
     </div>
