@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="generator" content="Crystal Docs 1.0.0">
-<meta name="crystal_docs.project_version" content="4.0.0">
+<meta name="crystal_docs.project_version" content="4.1.0">
 <meta name="crystal_docs.project_name" content="Crystal Config">
 
 
@@ -14,7 +14,7 @@
 <script type="text/javascript" src="js/doc.js"></script>
 
   <meta name="repository-name" content="Crystal Config">
-  <title>Crystal Config 4.0.0</title>
+  <title>Crystal Config 4.1.0</title>
   <script type="text/javascript">
   CrystalDocs.base_path = "";
   </script>
@@ -40,7 +40,7 @@
       </h1>
 
       <span class="project-version">
-        4.0.0
+        4.1.0
       </span>
     </div>
   </div>
@@ -186,7 +186,7 @@
 where a CLI interface isn't enough. It aims to provide these configurations through a strongly
 typed class. Goals are:</p>
 
-<ul><li>[X] Declarative construction of config files (through macro driven classes)</li><li>[X] Supports property loading hierarchy</li><li>[X] * Supports loading from file</li><li>[X] ** Supports JSON</li><li>[X] ** Supports YAML</li><li>[X] ** Supports dotenv files</li><li>[X] ** Load different config file based on environment</li><li>[X] * Supports loading from environment variables</li><li>[X] * Supports loading from command line argument overrides (does not conflict with option_parser)</li><li>[X] * hierarchy can be configured</li><li>[X] * can support custom config loaders</li><li>[X] Supports runtime config overrides</li><li>[X] Supports property validators</li><li>[ ] Supports enum values</li><li>[ ] Supports lists of subconfigs</li><li>[ ] Auto generated config files if missing</li><li>[ ] New configurations automatically get added to config file if missing</li></ul>
+<ul><li>[X] Declarative construction of config files (through macro driven classes)</li><li>[X] Supports property loading hierarchy</li><li>[X] * Supports loading from file</li><li>[X] ** Supports JSON</li><li>[X] ** Supports YAML</li><li>[X] ** Supports dotenv files</li><li>[X] ** Load different config file based on environment</li><li>[X] * Supports loading from environment variables</li><li>[X] * Supports loading from command line argument overrides (does not conflict with option_parser)</li><li>[X] * hierarchy can be configured</li><li>[X] * can support custom config loaders</li><li>[X] Supports runtime config overrides</li><li>[X] Supports property validators</li><li>[ ] Supports config aliases (one config using values of another config)</li><li>[ ] Supports enum values</li><li>[ ] Supports lists of subconfigs</li><li>[ ] Auto generated config files if missing</li><li>[ ] New configurations automatically get added to config file if missing</li></ul>
 
 <h1><a id="examples" class="anchor" href="#examples">
   <svg class="octicon-link" aria-hidden="true">
@@ -346,7 +346,7 @@ defined it to be at config build time. This is to protect against infinite loops
 <pre><code class="language-crystal"><span class="c"># Using above example classes</span>
 
 use_stable <span class="o">=</span> <span class="n">false</span>
-builder.runtime_interceptor <span class="k">do</span> <span class="o">|</span>name, real_val<span class="o">|</span>
+builder.runtime_interceptor <span class="k">do</span> <span class="o">|</span>name, real_val, optional_class<span class="o">|</span>
   <span class="k">next</span> <span class="k">unless</span> name <span class="o">==</span> <span class="s">&quot;client.host&quot;</span>
 
   <span class="c"># Runtime interceptors are called after the `instance` config gets created, so this access is safe.</span>
@@ -354,6 +354,11 @@ builder.runtime_interceptor <span class="k">do</span> <span class="o">|</span>na
   <span class="c"># This specific call will not invoke this runtime handler again, as the &quot;client.host&quot; will have already</span>
   <span class="c"># recorded it&#39;s running runtime interceptors and not re-invoke them a second time.</span>
   <span class="t">ServerConfig</span>.instance.client.host
+
+  <span class="c"># optional_class is a third param you can, optionally, include in the block params that will be the base</span>
+  <span class="c"># type of the config value stored as a String. i.e. for this `client.host` example, optional_class will be &quot;String&quot;.</span>
+  <span class="c"># If this were instead `client.port`, optional_class == &quot;Int32&quot; (note the lack of `?` or `| Nil` as part of the</span>
+  <span class="c"># type declaration). This can be used to determine what type of response you should return.</span>
 
   <span class="k">next</span> <span class="s">&quot;stable.example.com&quot;</span> <span class="k">if</span> use_stable
 <span class="k">end</span>

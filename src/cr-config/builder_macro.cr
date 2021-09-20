@@ -46,7 +46,7 @@ module CrConfig
     macro _generate_builder
       class {{@type.id.split("::")[-1].id}}ConfigBuilder < AbstractBuilder
         @_base_name : String
-        @_runtime_interceptors = [] of Proc(String, AllTypes?, AllTypes?)
+        @_runtime_interceptors = [] of Proc(String, AllTypes?, String, AllTypes?)
         @_providers = [] of Providers::AbstractProvider
         @_validators = [] of Proc(String, AllTypes?, Nil)
 
@@ -62,7 +62,7 @@ module CrConfig
         # used. If the interceptor returns anything not-nil, that will override the existing value.
         #
         # Multiple runtime interceptors can be added, but only the first to return a non-nil value will override the value.
-        def runtime_interceptor(&block : (String, AllTypes?) -> AllTypes?)
+        def runtime_interceptor(&block : (String, AllTypes?, String) -> AllTypes?)
           @_runtime_interceptors << block
           self
         end
@@ -104,8 +104,8 @@ module CrConfig
         # NOTE: The compiler is not nice if you try to be too clever and abstract out these common blocks of casting
         # into another macro / method / recursively, and compile times may increase. Compile with `--stats` to see
         # length of time of various compile steps
-        def self.coerce(original : AllTypes, intended_type : Class, name_for_error : String) : AllTypes
-          return original if original.class == intended_type
+        def self.coerce(original : AllTypes, intended_type : String, name_for_error : String) : AllTypes
+          return original if original.class.to_s == intended_type
 
           # Edge case that needs to be handled before the below block:
           # If original is an array and the intended type is a String, throw an exception, as it's unclear in what way the
@@ -116,22 +116,22 @@ module CrConfig
 
           # TODO: try and be more intelligent about types (i.e. if original is already of type Int, don't convert to String
           # to then convert to Int32)
-          return "#{original}".to_i32 if intended_type == Int32
-          return "#{original}".to_i64 if intended_type == Int64
-          return "#{original}".to_u32 if intended_type == UInt32
-          return "#{original}".to_u64 if intended_type == UInt64
-          return "#{original}".to_f32 if intended_type == Float32
-          return "#{original}".to_f64 if intended_type == Float64
-          return original.to_s if intended_type == String
-          return ("#{original}" == "true" ? true : false) if intended_type == Bool
+          return "#{original}".to_i32 if intended_type == "Int32"
+          return "#{original}".to_i64 if intended_type == "Int64"
+          return "#{original}".to_u32 if intended_type == "UInt32"
+          return "#{original}".to_u64 if intended_type == "UInt64"
+          return "#{original}".to_f32 if intended_type == "Float32"
+          return "#{original}".to_f64 if intended_type == "Float64"
+          return original.to_s if intended_type == "String"
+          return ("#{original}" == "true" ? true : false) if intended_type == "Bool"
 
-          if intended_type.to_s.starts_with?("Array(") && original.is_a?(String)
+          if intended_type.starts_with?("Array(") && original.is_a?(String)
             original = CSV.parse(original)[0]
           end
 
-          if original.is_a?(Array) && intended_type.to_s.starts_with?("Array(")
+          if original.is_a?(Array) && intended_type.starts_with?("Array(")
             {% for i in PrimitiveTypes.union_types %}
-            if intended_type == Array({{i}})
+            if intended_type == "Array({{i}})"
               a = [] of {{i}}
               original.each do |x|
                 {% if i == Int32 %}a << "#{x}".to_i32{% end %}
@@ -147,14 +147,14 @@ module CrConfig
             end
             {% end %}
           elsif intended_type.to_s.starts_with?("Array(")
-            return ["#{original}".to_i32] if intended_type == Array(Int32)
-            return ["#{original}".to_i64] if intended_type == Array(Int64)
-            return ["#{original}".to_f32] if intended_type == Array(Float32)
-            return ["#{original}".to_f64] if intended_type == Array(Float64)
-            return ["#{original}".to_u32] if intended_type == Array(UInt32)
-            return ["#{original}".to_u64] if intended_type == Array(UInt64)
-            return ["#{original}" == "true" ? true : false] if intended_type == Array(Bool)
-            return [original.to_s] if intended_type == Array(String)
+            return ["#{original}".to_i32] if intended_type == "Array(Int32)"
+            return ["#{original}".to_i64] if intended_type == "Array(Int64)"
+            return ["#{original}".to_f32] if intended_type == "Array(Float32)"
+            return ["#{original}".to_f64] if intended_type == "Array(Float64)"
+            return ["#{original}".to_u32] if intended_type == "Array(UInt32)"
+            return ["#{original}".to_u64] if intended_type == "Array(UInt64)"
+            return ["#{original}" == "true" ? true : false] if intended_type == "Array(Bool)"
+            return [original.to_s] if intended_type == "Array(String)"
           end
 
           # We can get here if original is an array and the intended_type isn't
@@ -191,7 +191,7 @@ module CrConfig
               {% for name, props in CONFIG_PROPS %}
               {% if props[:is_base_type] %}
               when "{{name.downcase}}"
-                @{{name}} = {{@type.id.split("::")[-1].id}}ConfigBuilder.coerce(val, {{props[:base_type]}}, "{{name}}").as({{props[:base_type]}})
+                @{{name}} = {{@type.id.split("::")[-1].id}}ConfigBuilder.coerce(val, "{{props[:base_type]}}", "{{name}}").as({{props[:base_type]}})
                 return true
               {% else %}
               when "{{name.downcase}}"

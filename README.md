@@ -18,6 +18,7 @@ typed class. Goals are:
 - [X] * can support custom config loaders
 - [X] Supports runtime config overrides
 - [X] Supports property validators
+- [ ] Supports config aliases (one config using values of another config)
 - [ ] Supports enum values
 - [ ] Supports lists of subconfigs
 - [ ] Auto generated config files if missing
@@ -165,7 +166,7 @@ defined it to be at config build time. This is to protect against infinite loops
 # Using above example classes
 
 use_stable = false
-builder.runtime_interceptor do |name, real_val|
+builder.runtime_interceptor do |name, real_val, optional_class|
   next unless name == "client.host"
 
   # Runtime interceptors are called after the `instance` config gets created, so this access is safe.
@@ -173,6 +174,11 @@ builder.runtime_interceptor do |name, real_val|
   # This specific call will not invoke this runtime handler again, as the "client.host" will have already
   # recorded it's running runtime interceptors and not re-invoke them a second time.
   ServerConfig.instance.client.host
+
+  # optional_class is a third param you can, optionally, include in the block params that will be the base
+  # type of the config value stored as a String. i.e. for this `client.host` example, optional_class will be "String".
+  # If this were instead `client.port`, optional_class == "Int32" (note the lack of `?` or `| Nil` as part of the
+  # type declaration). This can be used to determine what type of response you should return.
 
   next "stable.example.com" if use_stable
 end

@@ -5,6 +5,7 @@ class RuntimeInterceptorConfig
 
   option myBool : Bool, default: true
   option myString : String
+  option myNilString : String?
   option sub : RuntimeInterceptorSubConfig
 end
 
@@ -97,6 +98,22 @@ describe "Runtime Interceptors" do
     r.myString.should eq "my super string"
   end
 
+  it "supports intercepting nilable values" do
+    builder = RuntimeInterceptorConfig.new_builder.provider do |bob|
+      bob.set("myString", "my super string")
+      bob.set("sub.myInts", 3)
+    end
+
+    return_something_else = false
+    builder.runtime_interceptor do |name, val|
+      next unless name == "myNilString"
+      "no longer nil"
+    end
+
+    r = builder.build
+    r.myNilString.should eq "no longer nil"
+  end
+
   it "doesn't go through infinite loops" do
     builder = RuntimeInterceptorConfig.new_builder.provider do |bob|
       bob.set("myString", "my super string")
@@ -165,5 +182,28 @@ describe "Runtime Interceptors" do
     r = builder.build
 
     r.myBool?.should be_false
+  end
+
+  it "passes base type to interceptor" do
+    builder = RuntimeInterceptorConfig.new_builder.provider do |bob|
+      bob.set("myString", "my super string")
+      bob.set("sub.myInts", 3)
+    end
+
+    classes = Hash(String, String).new
+
+    builder.runtime_interceptor do |name, val, clazz|
+      classes[name] = clazz
+      nil
+    end
+
+    r = builder.build
+
+    r.myBool?
+    r.myString
+    r.sub.myInts
+
+    classes.size.should eq 3
+    classes.should eq ({"myString" => "String", "myBool" => "Bool", "sub.myInts" => "Array(Int32)"})
   end
 end

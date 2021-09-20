@@ -4,7 +4,7 @@ module CrConfig::Macros
   # Generates class variable to store the providers, validators, interceptors, and the already parsed instance of
   # the config class, if already parsed.
   macro _generate_config_providers
-    @_runtime_interceptors = [] of Proc(String, AllTypes?, AllTypes?)
+    @_runtime_interceptors = [] of Proc(String, AllTypes?, String, AllTypes?)
     @@_config_names = Set(String).new
     @@_instance : {{@type}}?
 
@@ -52,7 +52,7 @@ module CrConfig::Macros
           # an infinite loop of looking up a config will invoke interceptors that lookup configs that...
           @_processing_interceptor << "{{name}}"
           @_runtime_interceptors.each do |proc|
-            p = proc.call(full_name, @{{name}})
+            p = proc.call(full_name, @{{name}}, "{{val[:base_type].id}}")
             unless p.nil? # If an interceptor returns false, we want to treat that as an override
               return p.as({{val[:base_type]}})
             end
@@ -89,12 +89,11 @@ module CrConfig::Macros
         return nil
       end
       {% end %}
-
     end
 
     def [](key : String)
       val = self[key]?
-      unless val.nil?
+      if val || val == false
         return val.not_nil!
       end
       raise KeyError.new("Missing configuration key #{key}")
@@ -103,7 +102,7 @@ module CrConfig::Macros
 
   # Generates the comprehensive and exhaustive `initialize` method for this configuration class. All properties are included
   macro _generate_constructor
-    def initialize(base_name : String, @_runtime_interceptors : Array(Proc(String, AllTypes?, AllTypes?)), {% for name, prop in CONFIG_PROPS %}
+    def initialize(base_name : String, @_runtime_interceptors : Array(Proc(String, AllTypes?, String, AllTypes?)), {% for name, prop in CONFIG_PROPS %}
       @{{name}} : {{prop[:type]}},
     {% end %})
       # property name to fully qualified name (i.e. "prop2" => "prop1.sub.prop2")
