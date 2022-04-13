@@ -5,7 +5,7 @@ module MyModule
     class MyRealConfig
       include CrConfig
 
-      option myString : String
+      option my_string : String
       option server : MySubConfig
     end
 
@@ -30,12 +30,12 @@ end
 describe "Crystal Config Modules" do
   it "Handles modules and nested modules" do
     other_bob = MyModule::MyNestedModule::MyRealConfig.new_builder.provider do |bob|
-      bob.set("myString", "hope this works")
+      bob.set("my_string", "hope this works")
     end
 
     m = other_bob.build
 
-    m.myString.should eq "hope this works"
+    m.my_string.should eq "hope this works"
     m.server.host.should eq "localhost"
     m.server.port.should be_nil
   end
@@ -43,12 +43,12 @@ describe "Crystal Config Modules" do
   it "Handles other modules" do
     other_bob = SeparateModule::MyOtherConfig.new_builder.provider do |bob|
       bob.set("real.server.host", "yup")
-      bob.set("real.mystring", "nope")
+      bob.set("real.my_string", "nope")
     end
 
     s = other_bob.build
 
-    s.real.myString.should eq "nope"
+    s.real.my_string.should eq "nope"
     s.real.server.host.should eq "yup"
     s.real.server.port.should be_nil
   end
@@ -56,14 +56,14 @@ describe "Crystal Config Modules" do
   it "uses the same instance" do
     other_bob = SeparateModule::MyOtherConfig.new_builder.provider do |bob|
       bob.set("real.server.host", "yup")
-      bob.set("real.mystring", "nope")
+      bob.set("real.my_string", "nope")
       bob.set("real.server.port", 8080)
     end
     SeparateModule::MyOtherConfig.set_instance(other_bob.build)
 
     s = SeparateModule::MyOtherConfig.instance
 
-    s.real.myString.should eq "nope"
+    s.real.my_string.should eq "nope"
     s.real.server.host.should eq "yup"
     s.real.server.port.should eq 8080
 
@@ -74,7 +74,7 @@ describe "Crystal Config Modules" do
   it "exposes the full list of configuration names available" do
     other_bob = SeparateModule::MyOtherConfig.new_builder.provider do |bob|
       bob.set("real.server.host", "yup")
-      bob.set("real.mystring", "nope") # case insensitive setting
+      bob.set("real.my_string", "nope") # case insensitive setting
       bob.set("real.server.port", 8080)
     end
 
@@ -82,18 +82,18 @@ describe "Crystal Config Modules" do
     names = SeparateModule::MyOtherConfig.get_config_names
 
     names.should contain "real.server.host"
-    names.should contain "real.myString"
+    names.should contain "real.my_string"
     names.should contain "real.server.port"
     names.size.should eq 4
 
     s["real.server.host"].should eq "yup"
     s["real.server.port"].should eq 8080
-    s["real.myString"].should eq "nope"
+    s["real.my_string"].should eq "nope"
   end
 
   it "missing key names refer to the full key name" do
     other_bob = SeparateModule::MyOtherConfig.new_builder.provider do |bob|
-      bob.set("real.mystring", "nope")
+      bob.set("real.my_string", "nope")
       bob.set("real.server.port", 8080)
     end
 
@@ -108,7 +108,7 @@ describe "Crystal Config Modules" do
 
   it "[] works with bool subconfig names when they're false" do
     other_bob = SeparateModule::MyOtherConfig.new_builder.provider do |bob|
-      bob.set("real.mystring", "nope")
+      bob.set("real.my_string", "nope")
       bob.set("real.server.port", 8080)
     end
 

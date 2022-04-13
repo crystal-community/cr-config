@@ -3,7 +3,7 @@ require "./spec_helper"
 class ProfileFileConfigSpec
   include CrConfig
 
-  option myString : String
+  option my_string : String
 end
 
 describe "File Config Provider" do
@@ -16,7 +16,7 @@ describe "File Config Provider" do
 
     f = builder.build
 
-    f.myString.should eq "it worked!"
+    f.my_string.should eq "it worked!"
   end
 
   it "loads files in a particular order" do
@@ -32,7 +32,7 @@ describe "File Config Provider" do
 
     f = builder.build
 
-    f.myString.should eq "this is the local environment"
+    f.my_string.should eq "this is the local environment"
 
     builder = ProfileFileConfigSpec.new_builder.providers do
       CrConfig::Providers::ProfileFileConfigProvider.new
@@ -46,6 +46,6 @@ describe "File Config Provider" do
 
     f = builder.build
 
-    f.myString.should eq "this is the testing environment"
+    f.my_string.should eq "this is the testing environment"
   end
 end

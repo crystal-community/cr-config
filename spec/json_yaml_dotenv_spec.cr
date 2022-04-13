@@ -16,6 +16,8 @@ class Test
 
   option prop10 : Float64, default: Float64::NAN
   option prop11 : Array(UInt32)
+
+  option prop12 : NillableFields
 end
 
 class SubTest
@@ -25,6 +27,13 @@ class SubTest
   option prop2 : Int32
   option prop3 : Array(String)
   option prop4 : Array(Int64)?
+end
+
+class NillableFields
+  include CrConfig
+
+  option prop1 : String?
+  option prop2 : String?
 end
 
 # parsable by dotenv
@@ -96,7 +105,8 @@ json_raw = <<-EOF
     3,
     5,
     8
-  ]
+  ],
+  "prop12": null
 }
 EOF
 
@@ -152,6 +162,9 @@ describe "CrCfg V2" do
     t.prop9.prop2.should eq 37
     t["prop9.prop3"].should eq ["test1", "test 2", "test3"]
     t["prop11"].class.should eq Array(UInt32)
+    t.prop12.should_not be_nil
+    t.prop12.prop1.should be_nil
+    t.prop12.prop2.should be_nil
   end
 
   it "parses and sets YAML" do
@@ -166,6 +179,9 @@ describe "CrCfg V2" do
     t.prop9.prop2.should eq 37
     t["prop9.prop3"].should eq ["test1", "test 2", "test3"]
     t["prop11"].class.should eq Array(UInt32)
+    t.prop12.should_not be_nil
+    t.prop12.prop1.should be_nil
+    t.prop12.prop2.should be_nil
   end
 
   it "parses and sets Dotenv" do
@@ -180,6 +196,9 @@ describe "CrCfg V2" do
     t.prop9.prop2.should eq 37
     t["prop9.prop3"].should eq ["test1", "test 2", "test3"]
     t["prop11"].class.should eq Array(UInt32)
+    t.prop12.should_not be_nil
+    t.prop12.prop1.should be_nil
+    t.prop12.prop2.should be_nil
   end
 
   it "parses dotenv strings with commas" do

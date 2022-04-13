@@ -1,8 +1,15 @@
 name: cr-config
-version: 4.1.0
+version: 4.2.0
 
 authors:
   - Troy Sornson <troy@sornson.io>
+
+
+development_dependencies:
+  crystal-kcov:
+    git: ssh://git@git.chugger.lan:2222/tsornson/crystal-kcov
+  ameba:
+    github: crystal-ameba/ameba
 
 crystal: 1.0.0
 

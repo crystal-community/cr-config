@@ -70,7 +70,7 @@ module CrConfig
         ENV.each do |env_name, env_val|
           # Trim off the env name prefix so it can line up with the real configuration name
           trimmed_name = env_name.gsub(@prefix, "")
-          name = trimmed_name.downcase.gsub(/_/, '.')
+          name = trimmed_name.downcase.gsub(/__/, '.')
           logger.debug { "Set #{name} from #{env_name}" } if bob.set(name, env_val)
         end
       end
@@ -115,8 +115,10 @@ module CrConfig
 
         h.each do |key, val|
           if val.as_a?
-            a = val.as_a.map { |x| x.to_s }
+            a = val.as_a.map(&.to_s)
             logger.debug { "Set #{key} from #{@file_source || "json source"}" } if bob.set(key, a)
+          elsif val.raw.nil?
+            logger.debug { "Skipping #{key} as already nil, read from #{@file_source || "json source"}" }
           else
             logger.debug { "Set #{key} from #{@file_source || "json source"}" } if bob.set(key, val.raw.as(AllTypes))
           end
@@ -126,7 +128,7 @@ module CrConfig
       # Will construct the full json path name as it recursively goes down the tree
       private def add_or_recurse(map, prefix, node)
         node.as_h.each do |k, v|
-          if t = v.as_h?
+          if v.as_h?
             add_or_recurse(map, "#{prefix}#{prefix.empty? ? "" : "."}#{k}", v)
           else
             map["#{prefix}#{prefix.empty? ? "" : "."}#{k}"] = v
@@ -150,8 +152,10 @@ module CrConfig
 
         h.each do |key, val|
           if val.as_a?
-            a = val.as_a.map { |x| x.to_s }
+            a = val.as_a.map(&.to_s)
             logger.debug { "Set #{key} from #{@file_source || "yaml source"}" } if bob.set(key, a)
+          elsif val.raw.nil?
+            logger.debug { "Skipping #{key} as already nil, read from #{@file_source || "yaml source"}" }
           else
             logger.debug { "Set #{key} from #{@file_source || "yaml source"}" } if bob.set(key, val.raw.as(AllTypes))
           end
@@ -160,7 +164,7 @@ module CrConfig
 
       private def add_or_recurse(map, prefix, node)
         node.as_h.each do |k, v|
-          if t = v.as_h?
+          if v.as_h?
             add_or_recurse(map, "#{prefix}#{prefix.empty? ? "" : "."}#{k}", v)
           else
             map["#{prefix}#{prefix.empty? ? "" : "."}#{k}"] = v
