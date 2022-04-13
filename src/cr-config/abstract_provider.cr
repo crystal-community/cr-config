@@ -68,6 +68,8 @@ module CrConfig
       def populate(bob : AbstractBuilder)
         logger = ::Log.for(EnvVarProvider)
         ENV.each do |env_name, env_val|
+          next if @prefix.size > 0 && !env_name.starts_with?(@prefix)
+
           # Trim off the env name prefix so it can line up with the real configuration name
           trimmed_name = env_name.gsub(@prefix, "")
           name = trimmed_name.downcase.gsub(/__/, '.')

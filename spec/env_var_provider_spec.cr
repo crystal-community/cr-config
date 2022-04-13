@@ -72,4 +72,28 @@ describe "Environment Variable Provider" do
 
     e.my_sub_config.some_underscored_name.should eq "test"
   end
+
+  it "ignores env vars unless beginning with prefix" do
+    bob = EnvVarProviderSpec.new_builder
+    bob.providers do
+      [
+        CrConfig::Providers::EnvVarProvider.new("MY_SERVER_"),
+      ]
+    end
+    bob.provider do |builder|
+      builder.set("my_sub_config.some_float", 4.0)
+      builder.set("my_sub_config.some_floaty_string", "4.0")
+    end
+
+    ENV["MY_SERVER_MY_UINT"] = "37"
+    # Should be ignored as not having the correct prefix
+    ENV["MY_SUB_CONFIG__SOME_STRING"] = "not nil"
+
+    e = bob.build
+
+    e.my_uint.should eq 37.to_u64
+    e.my_sub_config.some_float.should eq 4.0
+    e.my_sub_config.some_floaty_string.should eq "4.0"
+    e.my_sub_config.some_string.should be_nil
+  end
 end
