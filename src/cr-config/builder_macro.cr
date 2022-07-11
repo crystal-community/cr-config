@@ -212,7 +212,7 @@ module CrConfig
         end
 
         private def _validate_settings(validators)
-          # TODO: gracefully generate a new config?
+          # TODO: gracefully generate a new config? @maybe [probably not]
           {% for name, props in CONFIG_PROPS %}
           {% unless props[:nilable] %}
           if @{{name}}.nil? && !({{props[:nilable]}})

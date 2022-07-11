@@ -111,17 +111,17 @@ json_raw = <<-EOF
 EOF
 
 class DumbConfigProvider < CrConfig::Providers::AbstractProvider
-  def populate(bob : CrConfig::AbstractBuilder)
-    bob.set("prop2", 3)
-    bob.set("prop3", 4.to_i64)
-    bob.set("prop4", 3.to_f32)
-    bob.set("prop5", 37.0.to_f64)
-    bob.set("prop6", true)
-    bob.set("prop7", 9999999.to_u32)
-    bob.set("prop8", 111111111.to_u64)
-    bob.set("prop9.prop2", 50)
-    bob.set("prop9.prop3", ["this is ", "an", " array"])
-    bob.set("prop11", [1, 2, 3, 5, 8])
+  def populate(builder : CrConfig::AbstractBuilder)
+    builder.set("prop2", 3)
+    builder.set("prop3", 4.to_i64)
+    builder.set("prop4", 3.to_f32)
+    builder.set("prop5", 37.0.to_f64)
+    builder.set("prop6", true)
+    builder.set("prop7", 9999999.to_u32)
+    builder.set("prop8", 111111111.to_u64)
+    builder.set("prop9.prop2", 50)
+    builder.set("prop9.prop3", ["this is ", "an", " array"])
+    builder.set("prop11", [1, 2, 3, 5, 8])
   end
 end
 

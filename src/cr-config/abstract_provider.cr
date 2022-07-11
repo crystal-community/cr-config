@@ -31,7 +31,7 @@ module CrConfig
       # This method gets called with the instance of the configuration builder during config building.
       #
       # Use this method to populate the builder with any configuration name / values that this provider... provides
-      abstract def populate(bob : AbstractBuilder)
+      abstract def populate(builder : AbstractBuilder)
     end
 
     # Provider class that wraps a `Proc(AbstractBuilder, Nil)`
@@ -42,8 +42,8 @@ module CrConfig
       def initialize(@proc : Proc(AbstractBuilder, Nil))
       end
 
-      def populate(bob : AbstractBuilder)
-        @proc.call(bob)
+      def populate(builder : AbstractBuilder)
+        @proc.call(builder)
       end
     end
 
@@ -65,7 +65,7 @@ module CrConfig
       def initialize(@prefix = "")
       end
 
-      def populate(bob : AbstractBuilder)
+      def populate(builder : AbstractBuilder)
         logger = ::Log.for(EnvVarProvider)
         ENV.each do |env_name, env_val|
           next if @prefix.size > 0 && !env_name.starts_with?(@prefix)
@@ -73,7 +73,7 @@ module CrConfig
           # Trim off the env name prefix so it can line up with the real configuration name
           trimmed_name = env_name.gsub(@prefix, "")
           name = trimmed_name.downcase.gsub(/__/, '.')
-          logger.debug { "Set #{name} from #{env_name}" } if bob.set(name, env_val)
+          logger.debug { "Set #{name} from #{env_name}" } if builder.set(name, env_val)
         end
       end
     end
@@ -84,7 +84,7 @@ module CrConfig
     # any configurations discovered through command line arguments will be removed from the ARGV array, so that OptionParser won't error for unrecognized options.
     # This requires the configuration class to be constructed _before_ the `OptionParser.parse` method gets called.
     class CommandLineParser < AbstractProvider
-      def populate(bob : AbstractBuilder)
+      def populate(builder : AbstractBuilder)
         logger = ::Log.for(CommandLineParser)
         consumed = [] of String
         ARGV.each do |arg|
@@ -92,7 +92,7 @@ module CrConfig
             name, val = arg.split(/\s*=\s*/, 2)
             name = name[2..-1] if name.starts_with?("--")
 
-            consumed << arg if bob.set(name, val)
+            consumed << arg if builder.set(name, val)
           end
         end
         consumed.each do |arg|
@@ -109,7 +109,7 @@ module CrConfig
         @json_source = JSON.parse(json_source)
       end
 
-      def populate(bob : AbstractBuilder)
+      def populate(builder : AbstractBuilder)
         logger = ::Log.for(JsonProvider)
         h = {} of String => JSON::Any
 
@@ -118,11 +118,11 @@ module CrConfig
         h.each do |key, val|
           if val.as_a?
             a = val.as_a.map(&.to_s)
-            logger.debug { "Set #{key} from #{@file_source || "json source"}" } if bob.set(key, a)
+            logger.debug { "Set #{key} from #{@file_source || "json source"}" } if builder.set(key, a)
           elsif val.raw.nil?
             logger.debug { "Skipping #{key} as already nil, read from #{@file_source || "json source"}" }
           else
-            logger.debug { "Set #{key} from #{@file_source || "json source"}" } if bob.set(key, val.raw.as(AllTypes))
+            logger.debug { "Set #{key} from #{@file_source || "json source"}" } if builder.set(key, val.raw.as(AllTypes))
           end
         end
       end
@@ -146,7 +146,7 @@ module CrConfig
         @yaml_source = YAML.parse(yaml_source)
       end
 
-      def populate(bob : AbstractBuilder)
+      def populate(builder : AbstractBuilder)
         logger = ::Log.for(YamlProvider)
         h = {} of String => YAML::Any
 
@@ -155,11 +155,11 @@ module CrConfig
         h.each do |key, val|
           if val.as_a?
             a = val.as_a.map(&.to_s)
-            logger.debug { "Set #{key} from #{@file_source || "yaml source"}" } if bob.set(key, a)
+            logger.debug { "Set #{key} from #{@file_source || "yaml source"}" } if builder.set(key, a)
           elsif val.raw.nil?
             logger.debug { "Skipping #{key} as already nil, read from #{@file_source || "yaml source"}" }
           else
-            logger.debug { "Set #{key} from #{@file_source || "yaml source"}" } if bob.set(key, val.raw.as(AllTypes))
+            logger.debug { "Set #{key} from #{@file_source || "yaml source"}" } if builder.set(key, val.raw.as(AllTypes))
           end
         end
       end
@@ -187,13 +187,13 @@ module CrConfig
       def initialize(@source : String, @file_source : String? = nil)
       end
 
-      def populate(bob : AbstractBuilder)
+      def populate(builder : AbstractBuilder)
         logger = ::Log.for(DotenvProvider)
         @source.split("\n").each do |line|
           next if line.starts_with?(/\s*#/) || line.strip.empty?
 
           prop, val = line.split(/\s*=\s*/)
-          logger.debug { "Set #{prop} from #{@file_source || "dot env source"}" } if bob.set(prop, val)
+          logger.debug { "Set #{prop} from #{@file_source || "dot env source"}" } if builder.set(prop, val)
         end
       end
     end
@@ -212,7 +212,7 @@ module CrConfig
       def initialize(@file_name : String)
       end
 
-      def populate(bob : AbstractBuilder)
+      def populate(builder : AbstractBuilder)
         logger = ::Log.for(SimpleFileProvider)
         unless File.exists?(@file_name)
           logger.warn { "Unable to read #{@file_name}, file doesn't exist" }
@@ -224,13 +224,13 @@ module CrConfig
         case @file_name
         when .ends_with?(".json")
           deleg = JsonProvider.new(file_contents, @file_name)
-          deleg.populate(bob)
+          deleg.populate(builder)
         when .ends_with?(".yaml"), .ends_with?(".yml")
           deleg = YamlProvider.new(file_contents, @file_name)
-          deleg.populate(bob)
+          deleg.populate(builder)
         when .ends_with?(".env"), .ends_with?(".properties")
           deleg = DotenvProvider.new(file_contents, @file_name)
-          deleg.populate(bob)
+          deleg.populate(builder)
         else
           raise "Unsupported file type #{@file_name}, expected \".json\", \".yaml\", \".yml\", or \".env\""
         end
@@ -290,7 +290,7 @@ module CrConfig
       #
       # Given base file name `config.json`, a list of profiles `["prof1"]`, and separator of `_`, this will attempt to load all files
       # in `["config_prof1.json"]` under the provided folder_path. The profiles and separator are inserted where the file extension is found in the base file name.
-      def populate(bob : AbstractBuilder)
+      def populate(builder : AbstractBuilder)
         logger = ::Log.for(ProfileFileConfigProvider)
         if @folder_path && File.exists?(@folder_path.not_nil!) && @base_file
           if profs = @profiles
@@ -311,7 +311,7 @@ module CrConfig
 
             s = CrConfig::Providers::SimpleFileProvider.new("#{@folder_path}/#{file_name}")
 
-            s.populate(bob)
+            s.populate(builder)
           end
         else
           logger.warn { "Base file isn't defined" } unless @base_file
@@ -328,7 +328,7 @@ module CrConfig
       def initialize(@folder_path : String)
       end
 
-      def populate(bob : AbstractBuilder)
+      def populate(builder : AbstractBuilder)
         logger = ::Log.for(FolderConfigProvider)
 
         unless File.exists?(@folder_path)
@@ -337,7 +337,7 @@ module CrConfig
         end
 
         Dir.children(@folder_path).each do |child|
-          SimpleFileProvider.new("#{@folder_path}/#{child}").populate(bob)
+          SimpleFileProvider.new("#{@folder_path}/#{child}").populate(builder)
         end
       end
     end
@@ -398,7 +398,7 @@ module CrConfig
         self
       end
 
-      def populate(bob : AbstractBuilder)
+      def populate(builder : AbstractBuilder)
         logger = ::Log.for(FolderConfigProvider)
 
         unless File.exists?(@folder_path)
@@ -419,7 +419,7 @@ module CrConfig
             .separator(@profile_separator)
             .profiles do
               profiles
-            end.populate(bob)
+            end.populate(builder)
         end
       end
     end
