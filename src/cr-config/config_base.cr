@@ -26,7 +26,8 @@ module CrConfig
          is_base_type: SUPPORTED_TYPES.includes?("#{name.type.types[0]}"),
          base_type:    name.type.types[0],
          nilable:      name.type.types.map { |x| "#{x.id}" }.includes?("Nil"),
-         default:      default,
+         # Default might be `false`, and name.value maybe a Nop rather than a NilLiteral
+         default: default.nil? ? (name.value || nil) : default,
        } %}
   end
 

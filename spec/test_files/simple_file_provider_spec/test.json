@@ -1,4 +1,5 @@
 {
   "str_option":"this is a string",
+  "str_with_default":"Some other string",
   "arr_int32":[20394, 80980]
 }

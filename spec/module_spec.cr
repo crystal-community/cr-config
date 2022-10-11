@@ -13,6 +13,7 @@ module MyModule
       include CrConfig
 
       option host : String, default: "localhost"
+      option host2 : String = "localhost"
       option port : Int32?
       option bool : Bool, default: false
     end
@@ -37,6 +38,7 @@ describe "Crystal Config Modules" do
 
     m.my_string.should eq "hope this works"
     m.server.host.should eq "localhost"
+    m.server.host2.should eq "localhost"
     m.server.port.should be_nil
   end
 
@@ -82,11 +84,13 @@ describe "Crystal Config Modules" do
     names = SeparateModule::MyOtherConfig.get_config_names
 
     names.should contain "real.server.host"
+    names.should contain "real.server.host2"
     names.should contain "real.my_string"
     names.should contain "real.server.port"
-    names.size.should eq 4
+    names.size.should eq 5
 
     s["real.server.host"].should eq "yup"
+    s["real.server.host2"].should eq "localhost"
     s["real.server.port"].should eq 8080
     s["real.my_string"].should eq "nope"
   end

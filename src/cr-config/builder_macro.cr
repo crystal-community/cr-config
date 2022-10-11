@@ -186,6 +186,7 @@ module CrConfig
           end
 
           {% begin %}
+          # First time looks for name as it is, second time looks for name with '.' replaced with '_'
           2.times do
             case name.downcase
               {% for name, props in CONFIG_PROPS %}

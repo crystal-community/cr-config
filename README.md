@@ -58,8 +58,9 @@ class Database
   include CrConfig
 
   option hostname : String, default: "localhost"
+  # The below usage of `=` is the exact same as using the `default:` above
+  option schema : String = "http"
   option port : Int32
-  option schema : String, default: "http"
   option username : String?
   option password : String?
 end

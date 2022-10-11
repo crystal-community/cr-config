@@ -6,6 +6,7 @@ class SimpleFileProviderConfig
   option str_option : String
   option arr_int32 : Array(Int32)
   option nilable : String?
+  option str_with_default : String = "I'm a string!"
 end
 
 describe "Simple File Provider" do
@@ -17,6 +18,7 @@ describe "Simple File Provider" do
     s.str_option.should eq "this is a string"
     s.arr_int32.should eq [20394, 80980]
     s.nilable.should be_nil
+    s.str_with_default.should eq "Some other string"
   end
 
   it "parses yaml" do
@@ -27,6 +29,7 @@ describe "Simple File Provider" do
     s.str_option.should eq "this is a string"
     s.arr_int32.should eq [20394, 80980]
     s.nilable.should be_nil
+    s.str_with_default.should eq "I'm a string!"
   end
 
   it "parses env" do
@@ -37,6 +40,7 @@ describe "Simple File Provider" do
     s.str_option.should eq "this is a string"
     s.arr_int32.should eq [20394, 80980]
     s.nilable.should be_nil
+    s.str_with_default.should eq "I'm a string!"
   end
 end
 
